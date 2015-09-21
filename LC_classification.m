@@ -3,21 +3,26 @@ function [acc, map, cmat] = LC_classification (train_F, train_labels, test_F, te
 switch params.type
     case 'SVM'
         fprintf ('\tsvm: ');
-        svm_opt = sprintf('-s 0 -t %d -h 0 -b 1 -g %f -c %f', params.svm_kernel, params.svm_gamma, params.svm_C);
+        %%NB: old version from Mia's code
+        %svm_opt = sprintf('-s 0 -t %d -h 0 -b 1 -g %f -c %f', params.svm_kernel, params.svm_gamma, params.svm_C);
         % convert features to single precision (required by LIBSVM)
         %train_F = single(train_F);
         %test_F = single(test_F);
 %         model = svmtrain1(train_labels', train_F', svm_opt);
 %         [~,  ~, probs] = svmpredict1(test_labels', test_F', model, '-b 1');
+%         
+        sigma = mean(sqrt(sum(train_F.^2,1)))*params.svm_sigma_v;
         
-        %kernel_train = kernelmatrix('rbf',train_F, [], params.svm_gamma);
-        %kernel_test = kernelmatrix('rbf',train_F,test_F, params.svm_gamma);
-        kernel_train = kernelmatrix('lin',train_F');
-        kernel_test = kernelmatrix('lin',train_F',test_F');
-        
+        if strcmp (params.svm_kernel, 'rbf') == true
+            kernel_train = kernelmatrix(params.svm_kernel,train_F, [], sigma);
+            kernel_test = kernelmatrix(params.svm_kernel,train_F,test_F, sigma);
+        else
+            kernel_train = kernelmatrix('lin',train_F);
+            kernel_test = kernelmatrix('lin',train_F,test_F);
+        end
         [kernel_train,kernel_test]=prepare_kernel_for_svm(kernel_train,kernel_test);
         [~, probs]=SVM_1vsALL_wrapper(train_labels, test_labels, kernel_train,kernel_test,params.svm_C);
-        probs=probs';
+         probs=probs';
     case 'RF'
         % parse labels into strings with leading zeros
         nTraining_samples = length(train_labels);
