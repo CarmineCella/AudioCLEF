@@ -6,7 +6,7 @@ Dependencies:
 
 [ScatNetLight](https://github.com/edouardoyallon/ScatNetLight/releases) by E. Oyallon
 
-[scattering.m](https://github.com/lostanlen/scattering.m) by V. Lonstanlen
+[scattering.m](https://github.com/lostanlen/scattering.m) by V. Lostanlen
 
 [MFCC library](http://labrosa.ee.columbia.edu/matlab/rastamat/) by D. Ellis
 
