@@ -1,7 +1,7 @@
 function [Fs, labels_s, entries_s] = LC_summarization (F, labels, entries, params)
-    Fs = [];
-    labels_s = [];
-    entries_s = [];
+    Fs = zeros(size(F,1)*params.components, max(entries));
+    labels_s = zeros(1, max(entries));
+    entries_s =zeros(1, max(entries));
 
     switch (params.type)
         case 'mean_std'
@@ -10,10 +10,10 @@ function [Fs, labels_s, entries_s] = LC_summarization (F, labels, entries, param
                 g = F(:, entries == i);
                 gi = labels(entries == i);
                 tt = [mean(g, 2) std(g, 0, 2)];
-                Fs = [Fs tt(:)];
                 assert(length(unique(gi))==1);
-                labels_s = [labels_s unique(gi)];
-                entries_s = [entries_s i];
+                Fs(:,i) = tt(:);
+                labels_s(i) = unique(gi);
+                entries_s(i) =i;
             end
         case 'max'
             disp ('summarizing by max...');  
@@ -32,10 +32,10 @@ function [Fs, labels_s, entries_s] = LC_summarization (F, labels, entries, param
                     maxIndex = sortIndex (1 : a); %# Get a linear index into A of the 5 largest values
                     q = g(:, maxIndex);            
                 end
-                
-                Fs = [Fs q(:)];      
-                labels_s = [labels_s unique(gi)]; % always averaging labels
-                entries_s = [entries_s i];
+
+                Fs(:,i) = q(:);
+                labels_s(i) = unique(gi);
+                entries_s(i) =i;
             end
 %         case 'diff_map'
 %             disp ('summarizing by diffusion maps...');  
@@ -80,9 +80,9 @@ function [Fs, labels_s, entries_s] = LC_summarization (F, labels, entries, param
                     q = w(:);
                 end
                 
-                Fs = [Fs q(:)];      
-                labels_s = [labels_s mean(gi)]; % always averaging labels
-                entries_s = [entries_s i];
+                Fs(:,i) = q(:);
+                labels_s(i) = unique(gi);
+                entries_s(i) =i;
             end         
         case 'none'
             Fs = F;

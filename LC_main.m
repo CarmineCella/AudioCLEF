@@ -27,9 +27,9 @@ addpath ('../HSC');
 %db_params = struct ('location', '../../datasets/Mogees_april_2015');            % 6 classes
 
 %db_params = struct ('location', '../../datasets/bird_fake');                   % 2 classes
-%db_params = struct ('location', '../../datasets/minibird');                    % 15 classes
+db_params = struct ('location', '../../datasets/minibird');                    % 15 classes
 %db_params = struct ('location', '../../datasets/BD50CLASSES/FOLDERS');         % 50 classes
-db_params = struct ('location', '../../datasets/BirdCLEF_2014_folders');       % 500 classes
+%db_params = struct ('location', '../../datasets/BirdCLEF_2014_folders');       % 500 classes
 
 features_params = struct ('type', 'mfcc', ...
                           'mfcc_minf', 500, ...
@@ -54,8 +54,8 @@ learning_params = struct ('type', 'none', ...
                           'non_lin', 'module', ...
                           'K', 140);
                       
-summarization_params = struct ('type', 'mean_std', ...
-                               'components', 3);
+summarization_params = struct ('type', 'none', ...
+                               'components', 2);
                            
                                  
 classification_params = struct ('type', 'RF', ...
@@ -70,7 +70,7 @@ equalize_distribution = 'no';
 Nfolds = 3;
 tt_ratio = .25;
 dimensions = 0;
-standardize = 'yes';
+standardize = 'yes';    
 structured_validation = 'yes';
 
 saved_features = ''; % to decide if features must be recomputed
