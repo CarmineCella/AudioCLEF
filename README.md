@@ -4,11 +4,12 @@ This project contains experimental MATLAB code for the birds task of the [LifeCl
 
 Dependencies:
 
-[ScatNetLight](https://github.com/edouardoyallon/ScatNetLight/releases)
+[ScatNetLight](https://github.com/edouardoyallon/ScatNetLight/releases) by E. Oyallon
 
-[scattering.m](https://github.com/lostanlen/scattering.m)
+[scattering.m](https://github.com/lostanlen/scattering.m) by V. Lonstanlen
 
-[MFCC library by D. Ellis](http://labrosa.ee.columbia.edu/matlab/rastamat/)
+[MFCC library](http://labrosa.ee.columbia.edu/matlab/rastamat/) by D. Ellis
 
 For more information contact carmine.emanuele.cella@ens.fr
+
 (c) 2015 carmine e. cella
