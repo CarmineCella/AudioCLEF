@@ -64,29 +64,31 @@ function [Fs, labels_s, entries_s] = LC_summarization (F, labels, entries, param
 %                     labels_s = [labels_s mean(gi)]; % always averaging labels
 %                 end
 %             end
-%         case 'nnmf'
-%             disp ('summarizing by nnmf...');  
-%             for i = 1 : max (entries)
-%                 g = F(:, entries == i);
-%                 gi = labels(entries == i);                           
-%                 w = nnmf (g, params.components);
-%                 a = params.components;
-%                 q = [];
-%                 if a >= length (w)
-%                     for j = 1 : a;
-%                         q = [q w];
-%                     end
-%                 else
-%                     q = w(:);
-%                 end
-%                 
-%                 Fs = [Fs q(:)];      
-%                 labels_s = [labels_s mean(gi)]; % always averaging labels
-%             end         
+        case 'nnmf'
+            disp ('summarizing by nnmf...');  
+            for i = 1 : max (entries)
+                g = F(:, entries == i);
+                gi = labels(entries == i);                           
+                w = nnmf (g, params.components);
+                a = params.components;
+                q = [];
+                if a >= length (w)
+                    for j = 1 : a;
+                        q = [q w];
+                    end
+                else
+                    q = w(:);
+                end
+                
+                Fs = [Fs q(:)];      
+                labels_s = [labels_s mean(gi)]; % always averaging labels
+                entries_s = [entries_s i];
+            end         
         case 'none'
             Fs = F;
             labels_s = labels;
             entries_s = entries;
+            
         otherwise
             error ('LifeClef2015 error: invalid summarization');
     end
