@@ -33,8 +33,12 @@ switch params.type
         end
         fprintf ('\trandom forest...\n');
         model = TreeBagger(params.RF_ntree, train_F', train_labels_s, ...
-            'Method', 'classification');
+            'Method', 'classification', 'oobvarimp','on', 'Fboot', params.RF_fboot);
         [~, probs] = model.predict (test_F');
+        [obs vars] = size(model.X);
+        num_oob_per_tree = sum(sum(model.OOBIndices))/params.RF_ntree;
+        fprintf('\tin-bag samples: %d/%d\n', num_oob_per_tree, size(train_F',1))
+        
     otherwise
         error ('LifeClef2015 error: invalid classification method');
 end
@@ -69,7 +73,8 @@ if (strcmp (params.histogram_voting, 'yes') == true)
     end
 else 
     % NB: this version does not take into account a global voting per file
-    fprintf ('\tframe-wise classification...\n');
+    % in case of no summarization applied
+    fprintf ('\telement-wise classification...\n');
     predicted_labels = predicted_matrix(:, 1);
     predicted_files = predicted_matrix;
     ground_truth = test_labels;  

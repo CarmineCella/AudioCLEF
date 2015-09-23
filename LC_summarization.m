@@ -10,7 +10,6 @@ function [Fs, labels_s, entries_s] = LC_summarization (F, labels, entries, param
                 g = F(:, entries == i);
                 gi = labels(entries == i);
                 tt = [mean(g, 2) std(g, 0, 2)];
-                assert(length(unique(gi))==1);
                 Fs(:,i) = tt(:);
                 labels_s(i) = unique(gi);
                 entries_s(i) =i;

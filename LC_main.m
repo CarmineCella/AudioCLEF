@@ -54,16 +54,16 @@ learning_params = struct ('type', 'none', ...
                           'non_lin', 'module', ...
                           'K', 140);
                       
-summarization_params = struct ('type', 'none', ...
-                               'components', 2);
-                           
-                                 
+summarization_params = struct ('type', 'mean_std', ...
+                               'components', 2); % FIXME: must be set accordingly!
+                                            
 classification_params = struct ('type', 'RF', ...
                                 'svm_kernel', 'rbf', ...
                                 'svm_sigma_v', .81, ...
                                 'svm_C', .1, ...
-                                'RF_ntree', 200, ...
-                                'histogram_voting', 'yes');           
+                                'RF_ntree', 20, ...
+                                'RF_fboot', 1, ...
+                                'histogram_voting', 'no');           
 
 %%% global parameters
 equalize_distribution = 'no';
@@ -123,9 +123,9 @@ for ifold = 1:Nfolds
     if strcmp (structured_validation, 'yes')
         [train_F, test_F, train_labels, test_labels, train_entries, test_entries] = LC_split_dataset (F, labels, entries, tt_ratio);
     else
-        perm_idx = randperm (size (F, 2));
-        test_idx = perm_idx (1 : test_samples)';
-        train_idx = perm_idx (test_samples + 1:end)';
+        perm_idx = randperm(size (F, 2));
+        test_idx = perm_idx(1 : test_samples)';
+        train_idx = perm_idx(test_samples + 1:end)';
 
         test_labels = labels(test_idx);
         train_labels = labels(train_idx);
@@ -151,7 +151,6 @@ for ifold = 1:Nfolds
 
     [accv(ifold), mapv(ifold)] = LC_classification (train_F, train_labels, test_F, test_labels, ...
         test_entries, Nclass,  classification_params);
-
 end
 
 acc = mean (accv); map = mean (mapv);
