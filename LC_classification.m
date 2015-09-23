@@ -1,5 +1,38 @@
-function [acc, map, cmat] = LC_classification (train_F, train_labels, test_F, test_labels, ...
-    test_entries, Nclass, params)
+function [acc, map, cmat, inbag] = LC_classification (F, labels, entries, Nclass, params)
+
+if strcmp (params.structured_validation, 'yes')
+    [train_F, test_F, train_labels, test_labels, ~, test_entries] = LC_split_dataset (F, labels, entries, params.tt_ratio);
+else
+    total_samples = size (F, 2);
+    test_samples = floor (total_samples * params.tt_ratio);
+    %train_samples = total_samples - test_samples;
+    
+    perm_idx = randperm(size (F, 2));
+    test_idx = perm_idx(1 : test_samples)';
+    train_idx = perm_idx(test_samples + 1:end)';
+    
+    test_labels = labels(test_idx);
+    train_labels = labels(train_idx);
+    test_F = F(:, test_idx);
+    train_F = F(:, train_idx);
+    
+    test_entries = entries(test_idx);
+end
+
+%%% OLS feature selection / dimensionality reduction
+if (params.dimensions ~= 0)
+    fprintf ('\tdim. reduction: ');
+    [train_F, test_F, ~] = pls_multiclass_v2 (train_F, test_F, train_labels, Nclass, params.dimensions);
+end
+
+if strcmp (params.standardize, 'yes') == true %% independent
+    fprintf ('\tstandardizing features...\n');
+    [moys, stddevs, train_F] = LC_standardization (train_F);
+    
+    numFrames = size (test_F, 2);
+    test_F = (test_F - repmat (moys,1,numFrames))./repmat(stddevs,1,numFrames);
+end
+
 switch params.type
     case 'SVM'
         fprintf ('\tsvm: ');
@@ -8,9 +41,9 @@ switch params.type
         % convert features to single precision (required by LIBSVM)
         %train_F = single(train_F);
         %test_F = single(test_F);
-%         model = svmtrain1(train_labels', train_F', svm_opt);
-%         [~,  ~, probs] = svmpredict1(test_labels', test_F', model, '-b 1');
-%         
+        %         model = svmtrain1(train_labels', train_F', svm_opt);
+        %         [~,  ~, probs] = svmpredict1(test_labels', test_F', model, '-b 1');
+        %
         sigma = mean(sqrt(sum(train_F.^2,1)))*params.svm_sigma_v;
         
         if strcmp (params.svm_kernel, 'rbf') == true
@@ -22,7 +55,8 @@ switch params.type
         end
         [kernel_train,kernel_test]=prepare_kernel_for_svm(kernel_train,kernel_test);
         [~, probs]=SVM_1vsALL_wrapper(train_labels, test_labels, kernel_train,kernel_test,params.svm_C);
-         probs=probs';
+        probs=probs';
+        num_oob_per_tree (size (train_F, 2));
     case 'RF'
         % parse labels into strings with leading zeros
         nTraining_samples = length(train_labels);
@@ -37,7 +71,7 @@ switch params.type
         [~, probs] = model.predict (test_F');
         [obs vars] = size(model.X);
         num_oob_per_tree = sum(sum(model.OOBIndices))/params.RF_ntree;
-        fprintf('\tin-bag samples: %d/%d\n', num_oob_per_tree, size(train_F',1))
+        fprintf('\tin-bag samples: %d/%d\n', floor(num_oob_per_tree), size(train_F',1))
         
     otherwise
         error ('LifeClef2015 error: invalid classification method');
@@ -47,7 +81,7 @@ end
 boolean_matrix = bsxfun(@eq, predicted_matrix, test_labels.');
 
 if (strcmp (params.histogram_voting, 'yes') == true)
-      fprintf ('\thistogram voting...\n');
+    fprintf ('\thistogram voting...\n');
     %...........................................................................
     ground_truth = [];
     file_list = [];
@@ -58,7 +92,7 @@ if (strcmp (params.histogram_voting, 'yes') == true)
         associated_label = mean (test_labels(test_entries==current_file));
         ground_truth = [ground_truth associated_label];
     end
-
+    
     predicted_files = zeros (length (ground_truth), size (predicted_matrix, 2));
     for j = 1:size (predicted_matrix, 2)
         predicted_labels = predicted_matrix(:, j);
@@ -71,13 +105,13 @@ if (strcmp (params.histogram_voting, 'yes') == true)
         end
         predicted_files (:, j) = predicted_file_label;
     end
-else 
+else
     % NB: this version does not take into account a global voting per file
     % in case of no summarization applied
     fprintf ('\telement-wise classification...\n');
     predicted_labels = predicted_matrix(:, 1);
     predicted_files = predicted_matrix;
-    ground_truth = test_labels;  
+    ground_truth = test_labels;
 end
 
 perf = classperf (ground_truth, predicted_files(:, 1));
@@ -86,18 +120,19 @@ map = LC_MAP_at_K (ground_truth, predicted_files, Nclass);
 cmat = confusionmat(ground_truth, predicted_files(:, 1));
 
 fprintf ('\taccuracy: %f, map: %f\n', acc, map);
-
-figure 
-subplot (3, 1, 1)
-imagesc (boolean_matrix)
-title ('Boolean matrix');
-subplot (3, 1, 2)
-plot (ground_truth)
-hold on
-plot (predicted_files(:,1), 'r')
-title ('Test vs predicted')
-subplot (3, 1, 3)
-imagesc (cmat);
-title ('Confusion matrix');
-
+if strcmp  (params.debug, 'yes') == true
+    figure
+    subplot (3, 1, 1)
+    imagesc (boolean_matrix)
+    title ('Boolean matrix');
+    subplot (3, 1, 2)
+    plot (ground_truth)
+    hold on
+    plot (predicted_files(:,1), 'r')
+    title ('Test vs predicted')
+    subplot (3, 1, 3)
+    imagesc (cmat);
+    title ('Confusion matrix');
+end
+inbag = num_oob_per_tree;
 end
