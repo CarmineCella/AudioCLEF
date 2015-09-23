@@ -61,10 +61,11 @@ equalization_params = struct ('type', 'none');
 %%% global parameters
 Nfolds = 3;
 
-%% run natch tests changing classification parameters
+%% run batch tests changing classification parameters (RF)
 ntrees = [1:10:51];
 fboots = [1:-.1:.1];
-var2samp = [
+var2samp =[9:10:80];
+
 results = [];
 for i = 1 : length (ntrees)
     for j = 1 : length (fboots)
@@ -78,16 +79,23 @@ for i = 1 : length (ntrees)
             'svm_C', .1, ...
             'RF_ntree', ntrees(i), ...
             'RF_fboot', fboots(j), ...
+            'RF_var2samp', 10, ...
             'histogram_voting', 'no',...
             'debug', 'no');
         [~, ~, ~, acc, map, inbag] = LC_batch (db_params, features_params, learning_params, ...
             summarization_params, equalization_params, classification_params, Nfolds);
 
-        fprintf ('ntrees = %d, inbag = %f, map = %f\n', ntrees(i), inbag, map);
-        p = [ntrees(i) inbag map];
+        fprintf ('ntrees = %d, inbag = %f, var2samp = %d, map = %f\n', ntrees(i), inbag, var2samp(i), map);
+        p = [ntrees(i) inbag var2samp(i) map];
         results = [results p'];
     end
 end
 
-surf (results)
+figure
 title ('Ntrees vs in-bag vs var2samp vs MAP')
+plot (results(1, :) ./ max(results(1, :)));
+hold on
+plot (results(2, :) ./ max(results(2, :)), 'k');
+plot (results(3, :) ./ max(results(3, :)), 'g');
+plot (results(4, :) ./ max(results(4, :)), 'r', 'LineWidth', 2);
+legend ('ntrees', 'inbag', 'var2samp', 'MAP')
