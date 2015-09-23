@@ -64,7 +64,7 @@ Nfolds = 3;
 %% run natch tests changing classification parameters
 ntrees = [1:10:51];
 fboots = [1:-.1:.1];
-
+var2samp = [
 results = [];
 for i = 1 : length (ntrees)
     for j = 1 : length (fboots)
@@ -90,4 +90,4 @@ for i = 1 : length (ntrees)
 end
 
 surf (results)
-title ('Ntrees vs in-bag vs MAP')
+title ('Ntrees vs in-bag vs var2samp vs MAP')
