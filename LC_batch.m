@@ -1,5 +1,5 @@
 
-function [F, labels, entries, acc, map, inbag] = LC_batch (db_params, features_params, learning_params, summarization_params, ...
+function [F, labels, entries, acc, map] = LC_batch (db_params, features_params, learning_params, summarization_params, ...
     equalization_params, classification_params, Nfolds)
 saved_features = ''; % to decide if features must be recomputed
 saved_db = '';
@@ -36,22 +36,18 @@ save('LC_data_summarized.mat', 'F', 'labels', 'entries', '-v7.3');
 %% classification
 
 accv = zeros (Nfolds,1);
-inbag = zeros (Nfolds,1);
 mapv = zeros (Nfolds,1);
 
 for ifold = 1:Nfolds
     fprintf ('classification fold %d\n', ifold);
-    [accv(ifold), mapv(ifold), ~, inbag(ifold)] = LC_classification (F, labels, entries, Nclass, classification_params);
+    [accv(ifold), mapv(ifold)] = LC_classification (F, labels, entries, Nclass, classification_params);       
 end
 
 acc = mean (accv); map = mean (mapv); 
 
-% NB: in bag samples are equal to all set in SVM
-inbag = mean(inbag); 
-
 telapsed = toc (tstart);
 fprintf ('\n');
-results = sprintf ('[final results]\nacc = %f, map = %f, inbag = %f (performance time: %f sec.)\n', acc, map, inbag, telapsed);
+results = sprintf ('[final results]\nacc = %f, map = %f, (performance time: %f sec.)\n', acc, map, telapsed);
 disp (results);
 
 %% store results

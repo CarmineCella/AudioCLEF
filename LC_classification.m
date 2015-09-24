@@ -1,4 +1,4 @@
-function [acc, map, cmat, inbag] = LC_classification (F, labels, entries, Nclass, params)
+function [acc, map, cmat] = LC_classification (F, labels, entries, Nclass, params)
 
 if strcmp (params.structured_validation, 'yes')
     [train_F, test_F, train_labels, test_labels, ~, test_entries] = LC_split_dataset (F, labels, entries, params.tt_ratio);
@@ -56,7 +56,6 @@ switch params.type
         [kernel_train,kernel_test]=prepare_kernel_for_svm(kernel_train,kernel_test);
         [~, probs]=SVM_1vsALL_wrapper(train_labels, test_labels, kernel_train,kernel_test,params.svm_C);
         probs=probs';
-        num_oob_per_tree (size (train_F, 2));
     case 'RF'
         % parse labels into strings with leading zeros
         nTraining_samples = length(train_labels);
@@ -135,5 +134,4 @@ if strcmp  (params.debug, 'yes') == true
     imagesc (cmat);
     title ('Confusion matrix');
 end
-inbag = num_oob_per_tree;
 end

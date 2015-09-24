@@ -63,26 +63,26 @@ function [Fs, labels_s, entries_s] = LC_summarization (F, labels, entries, param
 %                     labels_s = [labels_s mean(gi)]; % always averaging labels
 %                 end
 %             end
-        case 'nnmf'
-            disp ('summarizing by nnmf...');  
-            for i = 1 : max (entries)
-                g = F(:, entries == i);
-                gi = labels(entries == i);                           
-                w = nnmf (g, params.components);
-                a = params.components;
-                q = [];
-                if a >= length (w)
-                    for j = 1 : a;
-                        q = [q w];
-                    end
-                else
-                    q = w(:);
-                end
-                
-                Fs(:,i) = q(:);
-                labels_s(i) = unique(gi);
-                entries_s(i) =i;
-            end         
+%         case 'nnmf'
+%             disp ('summarizing by nnmf...');  
+%             for i = 1 : max (entries)
+%                 g = F(:, entries == i);
+%                 gi = labels(entries == i);                           
+%                 [w, h] = nnmf (g, params.components);
+%                 a = params.components;
+%                 q = [];
+%                 if a >= length (w)
+%                     for j = 1 : a;
+%                         q = [q w];
+%                     end
+%                 else
+%                     q = w(:);
+%                 end
+%                 
+%                 Fs(:,i) = q(:);
+%                 labels_s(i) = unique(gi);
+%                 entries_s(i) =i;
+%             end         
         case 'none'
             Fs = F;
             labels_s = labels;
