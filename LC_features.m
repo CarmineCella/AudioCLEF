@@ -1,7 +1,4 @@
-function [F, labels, entries, class] = LC_features (db_location, params)
-F = [];
-labels = [];
-entries = [];
+function [F, labels, entries] = LC_features(db_location, params)
 if (strcmp (params.scat_type, 'scat1'))
     opts{1}.time.size = params.scat_chunksize;
     opts{1}.time.T = params.scat_tw1;
@@ -39,13 +36,15 @@ foldernames = dir(db_location);
 if (length (foldernames) < 3)
     error ('LifeClef2015 error: cannot find database');
 end
-foldernames = foldernames (3 : length(foldernames));
+foldernames = foldernames (3:length(foldernames));
+nFolders = length(foldernames);
 
-file_ctx = 1; % absolute file counter
-class_ctx = 0;
+folder_features = cell(nFolders, 1);
+folder_entries = cell(nFolders, 1);
+folder_labels = cell(nFolders, 1);
 
-class=zeros(0,1);
-k=0;
+file_ctx = 0; % absolute file counter (incremented by nNonempty_files, not by 1)
+folder_ctx = 0; % absolute folder counter
 
 for iFolder = 1 : length (foldernames)
     filenames = dir(strcat (db_location, '/', foldernames(iFolder).name));
@@ -54,20 +53,27 @@ for iFolder = 1 : length (foldernames)
     if foldernames(iFolder).name(1) == '.'
         continue
     end
+    % Skip empty folder
+    if length(filenames) < 1
+        continue
+    end
+    folder_ctx = folder_ctx + 1;
     fprintf('processed folder %s (%d/%d)\n', ...
         foldernames (iFolder).name, iFolder, length (foldernames));
-    class_ctx = class_ctx + 1;
     
+    nFiles = length(filenames);
+    file_features = cell(nFiles, 1);
+    file_entries = cell(nFiles, 1);
+    file_labels = cell(nFiles, 1);
     
-    for iFile = 1 : length(filenames)
-
+    parfor iFile = 1 : length(filenames)
+        
         filename = strcat (db_location, '/', foldernames(iFolder).name,'/',filenames(iFile).name);
         [~, ~, ext] = fileparts (filename);
         if (strcmp (ext, '.wav') == false)
             continue;
         end
-        k= k + 1; class(k) = iFolder;
-                
+        
         [temp, sr] = audioread (filename);
         
         if (strcmp (params.rms_norm, 'yes') == true)
@@ -103,9 +109,9 @@ for iFolder = 1 : length (foldernames)
         threshff = ff;
         
         if (strcmp (params.debug, 'yes') == true)
-            figure
-            subplot (3, 1, 1)
-            imagesc (origff)
+            figure();
+            subplot (3, 1, 1);
+            imagesc (origff);
             title ('original');
             subplot (3, 1, 2)
             imagesc (logff)
@@ -114,19 +120,46 @@ for iFolder = 1 : length (foldernames)
             imagesc (threshff)
             title ('threshold');
             
-            keyboard
+            keyboard();
             close all
         end
-        
-        for i = 1 : size (ff, 2)
-            F = [F ff(:,i)];
-            labels = [labels class_ctx];
-            entries = [entries file_ctx];
-        end
-        
-        file_ctx = file_ctx + 1; % absolute file counter
+        file_features{iFile} = ff;
     end
+    
+    % Get rid of empty files
+    empty_files = cellfun(@isempty, file_features);
+    nonempty_files = ~empty_files;
+    folder_features{iFolder} = [file_features{~empty_files}];
+    
+    % Get number of frames per non-empty file
+    nNonempty_files = sum(nonempty_files);
+    nFrames_per_file = cellfun(@(x) size(x,2), file_features(nonempty_files));
+    
+    
+    % Retrieve file entries
+    single_file_entries = file_ctx + (1:nNonempty_files).';
+    file_entries = arrayfun(@(x, y) repmat(x, y, 1), single_file_entries, ...
+        nFrames_per_file, 'UniformOutput', false);
+    file_entries = cellfun(@transpose, file_entries, 'UniformOutput', false);
+    folder_entries{iFolder} = [file_entries{:}];
+    
+    % Retrieve file labels
+    single_file_labels = ones(nNonempty_files, 1) * folder_ctx;
+    file_labels = arrayfun(@(x, y) repmat(x, y, 1), single_file_labels, ...
+        nFrames_per_file, 'UniformOutput', false);
+    file_labels = cellfun(@transpose, file_labels, 'UniformOutput', false);
+    folder_labels{iFolder} = [file_labels{:}];
+
+    file_ctx = file_ctx + nNonempty_files;
 end
 
-fprintf ('\ntotal number of files: %d\n\n', file_ctx - 1);
+% Get rid of empty folders
+empty_folders = cellfun(@isempty, folder_features);
+nonempty_folders = ~empty_folders;
+
+F = [folder_features{nonempty_folders}];
+labels = [folder_labels{nonempty_folders}];
+entries = [folder_entries{nonempty_folders}];
+
+fprintf ('\ntotal number of files: %d\n\n', file_ctx);
 end

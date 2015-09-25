@@ -15,7 +15,7 @@ end
 
 if (strcmp (saved_features, evalc (['disp (features_params)'])) ~= true) || ...
         (strcmp (saved_db, evalc (['disp (db_params)'])) ~= true)
-    [F, labels, entries, class] = LC_features (db_params.location, features_params);
+    [F, labels, entries] = LC_features (db_params.location, features_params);
     saved_features = evalc (['disp (features_params)']);
     saved_db = evalc (['disp (db_params)']);
     save('LC_features_and_labels.mat', 'F', 'labels', 'entries', 'saved_features', 'saved_db', '-v7.3');
@@ -38,7 +38,7 @@ save('LC_data_summarized.mat', 'F', 'labels', 'entries', '-v7.3');
 accv = zeros (Nfolds,1);
 mapv = zeros (Nfolds,1);
 
-for ifold = 1:Nfolds
+parfor ifold = 1:Nfolds
     fprintf ('classification fold %d\n', ifold);
     [accv(ifold), mapv(ifold)] = LC_classification (F, labels, entries, Nclass, classification_params);       
 end
