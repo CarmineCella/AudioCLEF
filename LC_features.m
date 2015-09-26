@@ -66,7 +66,7 @@ for iFolder = 1 : length (foldernames)
     file_entries = cell(nFiles, 1);
     file_labels = cell(nFiles, 1);
     
-    parfor iFile = 1 : length(filenames)
+    for iFile = 1 : length(filenames)
         
         filename = strcat (db_location, '/', foldernames(iFolder).name,'/',filenames(iFile).name);
         [~, ~, ext] = fileparts (filename);
@@ -92,6 +92,10 @@ for iFolder = 1 : length (foldernames)
                 fprintf ('\tcomputing scattering on %s...\n', filename);
                 S = sc_propagate(temp, archs);
                 ff = sc_format(S);
+            case 'alogc'
+                fprintf ('\tcomputing average-log coefficients on %s...\n', filename);
+                [~, ff]  = LC_AverageLogCoeff (temp, params.alogc_win, params.alogc_olap, ...
+                    params.alogc_nbands, params.alogc_ncoeff, params.alogc_alpha);
             otherwise
                 error ('LifeClef2015 error: invalid feature type');
         end
@@ -149,7 +153,7 @@ for iFolder = 1 : length (foldernames)
         nFrames_per_file, 'UniformOutput', false);
     file_labels = cellfun(@transpose, file_labels, 'UniformOutput', false);
     folder_labels{iFolder} = [file_labels{:}];
-
+    
     file_ctx = file_ctx + nNonempty_files;
 end
 
