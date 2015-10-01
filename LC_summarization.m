@@ -1,101 +1,52 @@
 function [Fs, labels_s, entries_s] = LC_summarization (F, labels, entries, params)
-    Fs = zeros(size(F,1)*params.components, max(entries));
-    labels_s = zeros(1, max(entries));
-    entries_s =zeros(1, max(entries));
 
-    switch (params.type)
-        case 'mean_std'
-            disp ('summarizing by mean and std deviation...');  
-            for i = 1 : max (entries)
-                g = F(:, entries == i);
-                gi = labels(entries == i);
-                tt = [mean(g, 2) std(g, 0, 2)];
-                Fs(:,i) = tt(:);
-                labels_s(i) = unique(gi);
-                entries_s(i) =i;
-            end
-        case 'scat_summary'
-               opts{1}.time.size = params.scat_chunksize;
-    opts{1}.time.T = params.scat_tw1;
-    opts{1}.time.max_Q = params.scat_Q;
-    opts{1}.time.gamma_bounds = [1 params.scat1_max_coeff];
-    archs = sc_setup (opts);
-    
-        case 'max'
-            disp ('summarizing by max...');  
-            for i = 1 : max (entries)
-                g = F(:, entries == i); 
-                gi = labels(entries == i);
-                w = sum (g);
-                [~,sortIndex] = sort (w(:), 'descend');
-                a = params.components;
-                q = [];
-                if a > length (sortIndex)
-                    for j = 1 : a;
-                        q = [q g];
-                    end
-                else
-                    maxIndex = sortIndex (1 : a); %# Get a linear index into A of the 5 largest values
-                    q = g(:, maxIndex);            
-                end
+if strcmp(params.type, 'none')
+    Fs = F;
+    labels_s = labels;
+    entries_s = entries;
+    return
+end
 
-                Fs(:,i) = q(:);
-                labels_s(i) = unique(gi);
-                entries_s(i) =i;
+labels_s = zeros(1, max(entries));
+entries_s = zeros(1, max(entries));
+nFiles = max(entries);
+file_features = cell(nFiles, 1);
+for file_index = 1:nFiles
+    file_features{file_index} = F(:, entries == file_index);
+    gi = labels(entries == file_index);
+    labels_s(file_index) = unique(gi);
+    entries_s(file_index) = file_index;
+end
+nFeatures = size(F, 1);
+
+switch (params.type)
+    case 'mean_std'
+        disp ('summarizing by mean and std deviation...');
+        Fs = zeros(2, nFeatures, nFiles);
+        for file_index = 1:nFiles
+            Fs(1, :, file_index) = mean(file_features{file_index}, 2);
+            Fs(2, :, file_index) = std(file_features{file_index}, 0, 2);
+        end
+        Fs = reshape(Fs, 2 * nFeatures, nFiles);
+    case 'scat_summary'
+        disp('summarizing with scattering');
+        opts{1}.time.T = 512;
+        archs = sc_setup(opts);
+        % Total number of feature made by phi + psi_s
+        nPaths = 1 + length(archs{1}.banks{1}.psis{1});
+        Fs = zeros(nFeatures, nPaths, nFiles);
+        for file_index = 1:nFiles
+            U0 = initialize_U(file_features{file_index}.', archs{1}.banks{1});
+            Y1 = U_to_Y(U0, archs{1});
+            U1 = Y_to_U(Y1{end}, archs{1});
+            for path_index = 1:(nPaths-1)
+                Fs(:, path_index, file_index) = ...
+                    squeeze(sum(sum(U1.data{path_index}, 1), 2));
             end
-%         case 'diff_map'
-%             disp ('summarizing by diffusion maps...');  
-%             for i = 1 : max (entries)
-%                 g = F(:, entries == i);
-%                 gi = labels(entries == i);
-%                 if size (g, 2) == 1
-%                     Fs = [Fs zeros(params.components, 1)];
-%                     labels_s = [labels_s mean(gi)]; % always averaging labels                   
-%                 else                
-%                     diff_mat = difference_matrix (g, 1);
-% 
-%                     [variance] = estimate_variance (diff_mat, g, 1);
-%                     [~, ~, L] = make_laplacian (diff_mat, variance, .5);
-%                     [u,d] = eig(L);
-%                     [~, ma]= sort (diag(d), 'descend');
-%                     U = u(:, ma);
-% 
-% %                     principal_eig = U(:,[2:3]);
-% % 
-% %                     yhisto = hist (principal_eig(:), params.components);
-% 
-%                     tt = L(:);
-%                     size (tt)
-%                     Fs = [Fs tt(1:params.components)];
-%                     labels_s = [labels_s mean(gi)]; % always averaging labels
-%                 end
-%             end
-%         case 'nnmf'
-%             disp ('summarizing by nnmf...');  
-%             for i = 1 : max (entries)
-%                 g = F(:, entries == i);
-%                 gi = labels(entries == i);                           
-%                 [w, h] = nnmf (g, params.components);
-%                 a = params.components;
-%                 q = [];
-%                 if a >= length (w)
-%                     for j = 1 : a;
-%                         q = [q w];
-%                     end
-%                 else
-%                     q = w(:);
-%                 end
-%                 
-%                 Fs(:,i) = q(:);
-%                 labels_s(i) = unique(gi);
-%                 entries_s(i) =i;
-%             end         
-        case 'none'
-            Fs = F;
-            labels_s = labels;
-            entries_s = entries;
-            
-        otherwise
-            error ('LifeClef2015 error: invalid summarization');
-    end
+            Fs(:, end, file_index) = squeeze(sum(sum(U0.data, 1), 2));
+        end
+        Fs = reshape(Fs, nFeatures * nPaths, nFiles);
+    otherwise
+        error ('LifeClef2015 error: invalid summarization');
+end
 end
