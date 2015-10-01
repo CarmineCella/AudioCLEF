@@ -14,6 +14,13 @@ function [Fs, labels_s, entries_s] = LC_summarization (F, labels, entries, param
                 labels_s(i) = unique(gi);
                 entries_s(i) =i;
             end
+        case 'scat_summary'
+               opts{1}.time.size = params.scat_chunksize;
+    opts{1}.time.T = params.scat_tw1;
+    opts{1}.time.max_Q = params.scat_Q;
+    opts{1}.time.gamma_bounds = [1 params.scat1_max_coeff];
+    archs = sc_setup (opts);
+    
         case 'max'
             disp ('summarizing by max...');  
             for i = 1 : max (entries)

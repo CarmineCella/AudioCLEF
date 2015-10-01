@@ -66,9 +66,9 @@ for iFolder = 1 : length (foldernames)
     file_entries = cell(nFiles, 1);
     file_labels = cell(nFiles, 1);
     
-    for iFile = 1 : length(filenames)
-        
-        filename = strcat (db_location, '/', foldernames(iFolder).name,'/',filenames(iFile).name);
+    parfor iFile = 1 : length(filenames) 
+        filename = strcat (db_location, '/', foldernames(iFolder).name, ...
+            '/',filenames(iFile).name);
         [~, ~, ext] = fileparts (filename);
         if (strcmp (ext, '.wav') == false)
             continue;
@@ -85,49 +85,36 @@ for iFolder = 1 : length (foldernames)
         switch params.type
             case 'mfcc'
                 fprintf ('\tcomputing mfcc on %s...\n', filename);
-                [~, ff] = melfcc (temp, sr, 'maxfreq', params.mfcc_maxf, ...
-                    'minfreq', params.mfcc_minf,'numcep', params.mfcc_ceps, 'nbands', params.mfcc_bands, ...
-                    'fbtype', 'mel', 'dcttype', 2, 'wintime', params.mfcc_win, 'hoptime', params.mfcc_hop);
+                [~, file_features{iFile}] = ...
+                    melfcc (temp, sr, 'maxfreq', params.mfcc_maxf, ...
+                    'minfreq', params.mfcc_minf,'numcep', params.mfcc_ceps, ...
+                    'nbands', params.mfcc_bands, 'fbtype', 'mel', ...
+                    'dcttype', 2, 'wintime', params.mfcc_win, ...
+                    'hoptime', params.mfcc_hop);
             case 'scattering'
                 fprintf ('\tcomputing scattering on %s...\n', filename);
                 S = sc_propagate(temp, archs);
-                ff = sc_format(S);
+                file_features{iFile} = sc_format(S);
             case 'alogc'
-                fprintf ('\tcomputing average-log coefficients on %s...\n', filename);
-                [~, ff]  = LC_AverageLogCoeff (temp, params.alogc_win, params.alogc_olap, ...
-                    params.alogc_nbands, params.alogc_ncoeff, params.alogc_alpha);
+                fprintf('\tcomputing average-log coefficients on %s...\n', filename);
+                [~, file_features{iFile}] = ...
+                    LC_AverageLogCoeff(temp, params.alogc_win, ...
+                    params.alogc_olap, params.alogc_nbands, ...
+                params.alogc_ncoeff, params.alogc_alpha);
             otherwise
                 error ('LifeClef2015 error: invalid feature type');
         end
-        
-        origff = ff;
+
         if (strcmp (params.log_features, 'yes') == true)
             fprintf ('\t\tapplying log to features...\n');
-            ff = log1p (epsilon_logS * max (ff, 0));
+            file_features{iFile} = ...
+                log1p (epsilon_logS * max (file_features{iFile}, 0));
         end
-        logff = ff;
         if (strcmp (params.thresholding, 'yes') == true)
             fprintf ('\t\tapplying thresholding...\n');
-            ff = medfilt1 (ff, 7, size (ff, 1), 2);
+            file_features{iFile} = medfilt1(file_features{iFile}, 7, ...
+                size(file_features{iFile}, 1), 2);
         end
-        threshff = ff;
-        
-        if (strcmp (params.debug, 'yes') == true)
-            figure();
-            subplot (3, 1, 1);
-            imagesc (origff);
-            title ('original');
-            subplot (3, 1, 2)
-            imagesc (logff)
-            title ('log');
-            subplot (3, 1, 3);
-            imagesc (threshff)
-            title ('threshold');
-            
-            keyboard();
-            close all
-        end
-        file_features{iFile} = ff;
     end
     
     % Get rid of empty files
