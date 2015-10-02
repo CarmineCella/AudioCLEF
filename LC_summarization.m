@@ -29,7 +29,7 @@ switch (params.type)
         end
         Fs = reshape(Fs, 2 * nFeatures, nFiles);
     case 'scat_summary'
-        disp('summarizing with scattering');
+        disp('summarizing with scattering...');
         opts{1}.time.T = 512;
         archs = sc_setup(opts);
         % Total number of feature made by phi + psi_s
@@ -39,11 +39,22 @@ switch (params.type)
             U0 = initialize_U(file_features{file_index}.', archs{1}.banks{1});
             Y1 = U_to_Y(U0, archs{1});
             U1 = Y_to_U(Y1{end}, archs{1});
-            for path_index = 1:(nPaths-1)
-                Fs(:, path_index, file_index) = ...
-                    squeeze(sum(sum(U1.data{path_index}, 1), 2));
+            if ismatrix(U0.data)
+                % There is only one chunk. Layout is time x feature
+                % We sum along dimension 1 (time)
+                for path_index = 1:(nPaths-1)
+                    Fs(:, path_index, file_index) = ...
+                        squeeze(sum(U1.data{path_index}, 1));
+                end
+                Fs(:, end, file_index) = squeeze(sum(U0.data, 1));
+            elseif ndims(U0.data)==3
+                % There are chunks. Layout is time x chunk x feature
+                for path_index = 1:(nPaths-1)
+                    Fs(:, path_index, file_index) = ...
+                        squeeze(sum(sum(U1.data{path_index}, 1), 2));
+                end
+                Fs(:, end, file_index) = squeeze(sum(sum(U0.data, 1), 2));
             end
-            Fs(:, end, file_index) = squeeze(sum(sum(U0.data, 1), 2));
         end
         Fs = reshape(Fs, nFeatures * nPaths, nFiles);
     otherwise
