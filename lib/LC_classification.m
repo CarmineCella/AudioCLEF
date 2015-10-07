@@ -74,7 +74,7 @@ switch params.type
         fprintf('\tin-bag samples: %d/%d\n', floor(num_oob_per_tree), size(train_F',1))
         
     otherwise
-        error ('LifeClef2015 error: invalid classification method');
+        error ('AudioCLEF error: invalid classification method');
 end
 
 [~, predicted_matrix] = sort(probs, 2, 'descend');

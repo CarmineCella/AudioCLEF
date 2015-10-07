@@ -54,6 +54,6 @@ function [Fm, kernels] = LC_learning (F, params)
             Fm = h; %%% mapping is directly given by activation functions
             kernels = w;
         otherwise
-            error ('LifeClef2015 error: invalid learning');
+            error ('AudioCLEF error: invalid learning');
     end 
 end

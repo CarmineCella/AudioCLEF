@@ -34,7 +34,7 @@ epsilon_logS = 1e-2; %2^(-20); % same as scatnet
 
 foldernames = dir(db_location);
 if (length (foldernames) < 3)
-    error ('LifeClef2015 error: cannot find database');
+    error ('AudioCLEF error: cannot find database');
 end
 foldernames = foldernames (3:length(foldernames));
 nFolders = length(foldernames);
@@ -64,7 +64,7 @@ for iFolder = 1 : length (foldernames)
     nFiles = length(filenames);
     file_features = cell(nFiles, 1);
     
-    for iFile = 1 : length(filenames) 
+    parfor iFile = 1 : length(filenames) 
         filename = strcat (db_location, '/', foldernames(iFolder).name, ...
             '/',filenames(iFile).name);
         [~, ~, ext] = fileparts (filename);
@@ -106,7 +106,7 @@ for iFolder = 1 : length (foldernames)
                     params.alogc_olap, params.alogc_nbands, ...
                 params.alogc_ncoeff, params.alogc_alpha);
             otherwise
-                error ('LifeClef2015 error: invalid feature type');
+                error ('AudioCLEF error: invalid feature type');
         end
 
         if (strcmp (params.log_features, 'yes') == true)

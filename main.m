@@ -1,4 +1,4 @@
-%% LifeClef 2015 classification framework
+%% AudioCLEF 2015 classification framework
 %
 % Written by Carmine E. Cella, ENS - Paris
 % contact: carmine.emanuele.cella@ens.fr
@@ -9,28 +9,20 @@ close all
 
 rng (1);
 
+addpath('lib');
 addpath(genpath('../../libs/scattering.m/'));
 addpath('../../libs/ScatNetLight/dimensionality_reduction/');
-%addpath('../../libs/libsvm_light'); % Mia Xu Chen
 addpath(genpath('../../libs/ScatNetLight/svm_robust/'));
-%addpath('../../libs/ScatNetLight/svm_robust/libsvm-compact-0.1/matlab/');
-
 addpath ('../../libs/mfcc');
-%addpath ('../../libs/GMM');
-%addpath(genpath('../../libs/randomforest-matlab/'));
-%addpath(genpath('../../libs/SPKmeans'));
-%addpath ('../HSC');
 
 %% parameters and structures
-%db_params = struct ('location', '../../datasets/Instrument_samples');            % 94 classes
-%db_params = struct ('location', '../../datasets/Mogees_april_2015');            % 6 classes
-
+%db_params = struct ('location', '../../datasets/solosDb');                     % 20 classes
 %db_params = struct ('location', '../../datasets/bird_fake');                   % 2 classes
 db_params = struct ('location', '../../datasets/minibird');                    % 15 classes
 %db_params = struct ('location', '../../datasets/BD50CLASSES/FOLDERS');         % 50 classes
 %db_params = struct ('location', '../../datasets/BirdCLEF_2014_folders');       % 500 classes
 
-features_params = struct ('type', 'scattering', ...
+features_params = struct ('type', 'mfcc', ...
     'mfcc_minf', 500, ...
     'mfcc_maxf', 16001, ....
     'mfcc_bands', 40, ...

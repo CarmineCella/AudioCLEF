@@ -65,6 +65,6 @@ switch (params.type)
         end
         Fs = reshape(Fs, nFeatures * nPaths, nFiles);
     otherwise
-        error ('LifeClef2015 error: invalid summarization');
+        error ('AudioCLEF error: invalid summarization');
 end
 end
