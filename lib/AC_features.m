@@ -1,23 +1,23 @@
 function [F, labels, entries] = AC_features(db_location, params)
 if (strcmp (params.scat_type, 'scat1'))
-    opts{1}.time.T = params.scat_tw1;
+    opts{1}.time.T = params.scat_tw;
     opts{1}.time.max_Q = params.scat_Q;
     opts{1}.time.gamma_bounds = [1 params.scat1_max_coeff];
     archs = sc_setup (opts);
 end
 
 if (strcmp (params.scat_type, 'scat2'))
-    opts{1}.time.T = params.scat_tw1;
+    opts{1}.time.T = params.scat_tw;
     opts{1}.time.max_Q = params.scat_Q;
-    opts{2}.time.T = params.scat_tw2;
+    opts{2}.time.T = params.scat_tw;
     opts{2}.time.handle = @morlet_1d;
     archs = sc_setup (opts);
 end
 
 if (strcmp (params.scat_type, 'scatj'))
-    opts{1}.time.T = params.scat_tw1;
+    opts{1}.time.T = params.scat_tw;
     opts{1}.time.max_Q = params.scat_Q;
-    opts{2}.time.T = params.scat_tw2;
+    opts{2}.time.T = params.scat_tw;
     opts{2}.time.handle = @morlet_1d;
     opts{2}.gamma.phi_bw_multiplier = 1;
     opts{2}.gamma.T = 2 * opts{1}.time.max_Q;
