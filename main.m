@@ -4,10 +4,9 @@
 % contact: carmine.emanuele.cella@ens.fr
 %
 
-%clear all % Warning!!
-close all
+close all;
 
-rng (1);
+rng(1);
 
 addpath('lib');
 if ~exist('libs_folder', 'var');
