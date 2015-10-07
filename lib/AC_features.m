@@ -87,7 +87,6 @@ for iFolder = 1 : length (foldernames)
                     'dcttype', 2, 'wintime', params.mfcc_win, ...
                     'hoptime', params.mfcc_hop);
             case 'scattering'
-                S = {};
                 if strcmp (params.scat_norm, 'yes')
                     fprintf ('\tcomputing normalized scattering on %s...\n', filename);
                      S = sc_propagate_renorm(temp, archs);
