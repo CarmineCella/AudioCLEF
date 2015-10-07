@@ -10,17 +10,23 @@ close all
 rng (1);
 
 addpath('lib');
-addpath(genpath('../../libs/scattering.m/'));
-addpath('../../libs/ScatNetLight/dimensionality_reduction/');
-addpath(genpath('../../libs/ScatNetLight/svm_robust/'));
-addpath ('../../libs/mfcc');
+if ~exist('libs_folder', 'var');
+    libs_folder = '../../libs/';
+end
+addpath(genpath([libs_folder, 'scattering.m/']));
+addpath([libs_folder, 'ScatNetLight/dimensionality_reduction/']);
+addpath(genpath([libs_folder, 'ScatNetLight/svm_robust/']));
+addpath([libs_folder, 'mfcc']);
 
 %% parameters and structures
-%db_params = struct ('location', '../../datasets/solosDb');                     % 20 classes
-%db_params = struct ('location', '../../datasets/bird_fake');                   % 2 classes
-db_params = struct ('location', '../../datasets/minibird');                    % 15 classes
-%db_params = struct ('location', '../../datasets/BD50CLASSES/FOLDERS');         % 50 classes
-%db_params = struct ('location', '../../datasets/BirdCLEF_2014_folders');       % 500 classes
+if ~exist('datasets_folder', 'var')
+    datasets_folder = '../../datasets';
+end
+%db_params = struct ('location', [datasets_folder, 'solosDb']);                % 20  classes
+%db_params = struct ('location', [datasets_folder, 'bird_fake']);              % 2   classes
+db_params = struct ('location', [datasets_folder, 'minibird']);                % 15  classes
+%db_params = struct ('location', [datasets_folder, 'BD50CLASSES/FOLDERS']);    % 50  classes
+%db_params = struct ('location', [datasets_folder, 'BirdCLEF_2014_folders']);  % 500 classes
 
 features_params = struct ('type', 'mfcc', ...
     'mfcc_minf', 500, ...
