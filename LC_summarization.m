@@ -28,6 +28,13 @@ switch (params.type)
             Fs(2, :, file_index) = std(file_features{file_index}, 0, 2);
         end
         Fs = reshape(Fs, 2 * nFeatures, nFiles);
+     case 'mean'
+        disp ('summarizing by mean...');
+        Fs = zeros(1, nFeatures, nFiles);
+        for file_index = 1:nFiles
+            Fs(1, :, file_index) = mean(file_features{file_index}, 2);
+        end
+        Fs = reshape(Fs, nFeatures, nFiles);
     case 'scat_summary'
         disp('summarizing with scattering...');
         opts{1}.time.T = 512;

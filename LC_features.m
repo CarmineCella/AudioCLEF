@@ -64,7 +64,7 @@ for iFolder = 1 : length (foldernames)
     nFiles = length(filenames);
     file_features = cell(nFiles, 1);
     
-    parfor iFile = 1 : length(filenames) 
+    for iFile = 1 : length(filenames) 
         filename = strcat (db_location, '/', foldernames(iFolder).name, ...
             '/',filenames(iFile).name);
         [~, ~, ext] = fileparts (filename);
@@ -75,8 +75,8 @@ for iFolder = 1 : length (foldernames)
         [temp, sr] = audioread (filename);
         
         if (strcmp (params.rms_norm, 'yes') == true)
-            fprintf ('\t\tapplying rms normalization...\n');
-            temp = temp ./ sqrt (sum (temp .^2));
+            fprintf ('\tapplying rms normalization...\n');
+            temp = temp ./ sqrt (sum (temp .^2)) .* sqrt (length (temp));
         end
         
         % feature extraction
@@ -90,8 +90,14 @@ for iFolder = 1 : length (foldernames)
                     'dcttype', 2, 'wintime', params.mfcc_win, ...
                     'hoptime', params.mfcc_hop);
             case 'scattering'
-                fprintf ('\tcomputing scattering on %s...\n', filename);
-                S = sc_propagate(temp, archs);
+                S = {};
+                if strcmp (params.scat_norm, 'yes')
+                    fprintf ('\tcomputing normalized scattering on %s...\n', filename);
+                     S = sc_propagate_renorm(temp, archs);
+                else
+                    fprintf ('\tcomputing scattering on %s...\n', filename);
+                     S = sc_propagate(temp, archs);
+                end               
                 file_features{iFile} = sc_format(S);
             case 'alogc'
                 fprintf('\tcomputing average-log coefficients on %s...\n', filename);
