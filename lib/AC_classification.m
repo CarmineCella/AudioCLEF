@@ -1,7 +1,7 @@
-function [acc, map, cmat] = LC_classification (F, labels, entries, Nclass, params)
+function [acc, map, cmat] = AC_classification (F, labels, entries, Nclass, params)
 
 if strcmp (params.structured_validation, 'yes')
-    [train_F, test_F, train_labels, test_labels, ~, test_entries] = LC_split_dataset (F, labels, entries, params.tt_ratio);
+    [train_F, test_F, train_labels, test_labels, ~, test_entries] = AC_split_dataset (F, labels, entries, params.tt_ratio);
 else
     total_samples = size (F, 2);
     test_samples = floor (total_samples * params.tt_ratio);
@@ -27,7 +27,7 @@ end
 
 if strcmp (params.standardize, 'yes') == true %% independent
     fprintf ('\tstandardizing features...\n');
-    [moys, stddevs, train_F] = LC_standardization (train_F);
+    [moys, stddevs, train_F] = AC_standardization (train_F);
     
     numFrames = size (test_F, 2);
     test_F = (test_F - repmat (moys,1,numFrames))./repmat(stddevs,1,numFrames);
@@ -116,7 +116,7 @@ end
 
 perf = classperf (ground_truth, predicted_files(:, 1));
 acc = perf.CorrectRate;
-map = LC_MAP_at_K (ground_truth, predicted_files, Nclass);
+map = AC_MAP_at_K (ground_truth, predicted_files, Nclass);
 cmat = confusionmat(ground_truth, predicted_files(:, 1));
 
 fprintf ('\taccuracy: %f, map: %f\n', acc, map);

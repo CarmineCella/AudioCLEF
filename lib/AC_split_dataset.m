@@ -1,4 +1,4 @@
-function [train_F, test_F, train_labels, test_labels, train_entries, test_entries] = LC_split_dataset (F, labels, entries, tt_ratio)
+function [train_F, test_F, train_labels, test_labels, train_entries, test_entries] = AC_split_dataset (F, labels, entries, tt_ratio)
 
 fprintf ('\tsplitting train/test...');
 train_F = [];

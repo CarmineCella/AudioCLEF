@@ -1,4 +1,4 @@
-function score = LC_MAP_at_K(TestLabel, PredictLabels, k)
+function score = AC_MAP_at_K(TestLabel, PredictLabels, k)
     %MEANAVERAGEPRECISIONATK   Calculates the average precision at k
     %   score = meanAveragePrecisionAtK(TestLabel, PredictLabels, k)
     %

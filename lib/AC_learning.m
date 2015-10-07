@@ -1,4 +1,4 @@
-function [Fm, kernels] = LC_learning (F, params)
+function [Fm, kernels] = AC_learning (F, params)
     if (strcmp (params.pca_whitening, 'yes') == true)
         fprintf ('applying pca-whitening...\n');
     %     % from http://eric-yuan.me/ufldl-exercise-pca-image/

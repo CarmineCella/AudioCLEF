@@ -1,4 +1,4 @@
-function [F_r, labels_r, entries_r] = LC_distribution_eq (F, labels, entries, Nclass, params)
+function [F_r, labels_r, entries_r] = AC_distribution_eq (F, labels, entries, Nclass, params)
 switch params.type
     case 'none'
         F_r = F;

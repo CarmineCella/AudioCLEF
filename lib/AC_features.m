@@ -1,4 +1,4 @@
-function [F, labels, entries] = LC_features(db_location, params)
+function [F, labels, entries] = AC_features(db_location, params)
 if (strcmp (params.scat_type, 'scat1'))
     opts{1}.time.size = params.scat_chunksize;
     opts{1}.time.T = params.scat_tw1;
@@ -102,7 +102,7 @@ for iFolder = 1 : length (foldernames)
             case 'alogc'
                 fprintf('\tcomputing average-log coefficients on %s...\n', filename);
                 [~, file_features{iFile}] = ...
-                    LC_AverageLogCoeff(temp, params.alogc_win, ...
+                    AC_AverageLogCoeff(temp, params.alogc_win, ...
                     params.alogc_olap, params.alogc_nbands, ...
                 params.alogc_ncoeff, params.alogc_alpha);
             otherwise

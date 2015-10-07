@@ -1,4 +1,4 @@
-function [Fs, labels_s, entries_s] = LC_summarization (F, labels, entries, params)
+function [Fs, labels_s, entries_s] = AC_summarization (F, labels, entries, params)
 
 if strcmp(params.type, 'none')
     Fs = F;

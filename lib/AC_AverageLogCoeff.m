@@ -1,4 +1,4 @@
-function [alcoeff, alspec] = LC_AverageLogCoeff (signal, FFTsize, FFTolap, nbands, ncoeff, alpha)
+function [alcoeff, alspec] = AC_AverageLogCoeff (signal, FFTsize, FFTolap, nbands, ncoeff, alpha)
     FFTsize2 = FFTsize / 2;
     S = spectrogram (signal, FFTsize, FFTolap);
     M =  (abs (S));

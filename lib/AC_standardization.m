@@ -1,4 +1,4 @@
-function [moys,stddevs, x_out] = LC_standardization (x_in)
+function [moys,stddevs, x_out] = AC_standardization (x_in)
     epsilon = eps (); %1e-5;
 
 % to check!!
