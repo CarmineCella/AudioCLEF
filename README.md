@@ -1,6 +1,6 @@
 # AudioCLEF
 
-AudioCLEF is an experimental MATLAB framework for audio classification. It Currently supports several audio features, among which MFCC and scattering, and two classifiers (SVM and RandomForests). It is possible to change data before the final classification by means of normalization, standardization and supervised dimensionality reduction (OLS). 
+AudioCLEF is an experimental MATLAB framework for audio classification. It currently supports several audio features, among which MFCC and scattering, and two classifiers (SVM and RandomForests). It is possible to change data before the final classification by means of normalization, standardization and supervised dimensionality reduction (OLS). 
 
 It can be used with any dataset, the only constraint is that each class should be in a separate folder. For example:
 
