@@ -40,6 +40,7 @@ for i=1,dataset:size() do
     for j=1,m[2] do
         outp[j] = train_labels[i][j];
     end
+
 	dataset[i]=  {inp,outp};  --dataset[i]={input(i,:), output(i,:)}
 end
 
@@ -51,9 +52,12 @@ function testset:size() return t[1] end -- t[1] examples
 for i=1,t[1] do
     for j=1,t[2] do
         testp[j] = test_F[i][j];
+        print (testp[j])
     end
     testset[i] = {testp};
+    print (testset[i][1])
 end
+
 
 -- Now dataset has dim dataset[n[1]][2] where
 -- dataset[n[1]][1]: input(n[1],:) (vector of size n[2])

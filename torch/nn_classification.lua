@@ -2,6 +2,7 @@
 
 require 'torch'
 require 'nn'
+require 'gnuplot'
 
 -- load a dataset --
 dofile('data_loading.lua')
@@ -16,19 +17,25 @@ print(inputs)
 outputs=dataset[1][2]:size()[1];
 print(outputs)
 
-HU1s=15; -- def dim and number of hidden units (HU) --
+HU1s=800; -- def dim and number of hidden units (HU) --
+HU2s=400; -- def dim and number of hidden units (HU) --
+HU3s=120; -- def dim and number of hidden units (HU) --
 
 mlp:add(nn.Linear(inputs,HU1s))
 mlp:add(nn.Tanh())  --  we can put also the sigmoid  --
-mlp:add(nn.Linear(HU1s,outputs))
+mlp:add(nn.Linear(HU1s,HU2s))
+mlp:add(nn.Tanh())  --  we can put also the sigmoid  --
+mlp:add(nn.Linear(HU2s,HU3s))
+mlp:add(nn.Tanh())  --  we can put also the sigmoid  --
+mlp:add(nn.Linear(HU3s,outputs))
 
 --  Training a neural network --
 
 criterion = nn.MSECriterion()
 trainer = nn.StochasticGradient(mlp, criterion) --nn
-trainer.learningRate = 0.00001
-trainer.maxIteration = 150
---trainer.shuffleIndices = false
+trainer.learningRate = 0.0001
+-- trainer.maxIteration = 0
+-- trainer.shuffleIndices = false
 
 trainer:train(dataset)
 
@@ -40,9 +47,12 @@ t = test_F:size();
 pred=torch.Tensor(t)
 aux=torch.Tensor(t[2])
 pred=torch.Tensor(t[1],m[2])
+
 for i=1,t[1] do
-    aux=testset[i][1]
+    aux[1]=test_F[i][1]
+    aux[2]=test_F[i][2]
     pred[i]=mlp:forward(aux)  -- get the prediction of the mlp
+    print (pred[i])
 end
 
-print (pred)
+gnuplot.plot (pred)
