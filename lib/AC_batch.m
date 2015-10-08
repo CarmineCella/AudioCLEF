@@ -37,7 +37,7 @@ Nclass = length (unique (labels));
 accv = zeros (Nfolds,1);
 mapv = zeros (Nfolds,1);
 
-for ifold = 1:Nfolds
+parfor ifold = 1:Nfolds
     fprintf ('classification fold %d\n', ifold);
     [accv(ifold), mapv(ifold)] = AC_classification (F, labels, entries, Nclass, classification_params);       
 end

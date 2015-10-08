@@ -23,8 +23,8 @@ if ~exist('datasets_folder', 'var')
 end
 %db_params = struct ('location', [datasets_folder, 'solosDb']);                % 20  classes
 %db_params = struct ('location', [datasets_folder, 'bird_fake']);              % 2   classes
-db_params = struct ('location', [datasets_folder, 'minibird']);                % 15  classes
-%db_params = struct ('location', [datasets_folder, 'BD50CLASSES/FOLDERS']);    % 50  classes
+%db_params = struct ('location', [datasets_folder, 'minibird']);                % 15  classes
+db_params = struct ('location', [datasets_folder, 'BD50CLASSES/FOLDERS']);    % 50  classes
 %db_params = struct ('location', [datasets_folder, 'BirdCLEF_2014_folders']);  % 500 classes
 
 features_params = struct ('type', 'mfcc', ...
@@ -79,21 +79,5 @@ Nfolds = 3;
 %% run classifcation
 [F, labels, entries, acc, map] = AC_batch (db_params, features_params, learning_params, ...
     summarization_params, equalization_params, classification_params, Nfolds);
-
-%% example for batch execution
-% C = [0.1 1 2 4 10 20 50 100];
-% sigma = [.8:.1:1.3];
-% results = [];
-% for i = 1 : length (C)
-%     for j = 1 : length (sigma)
-%         
-%         ....
-%         fprintf ('C = %f, sigma = %f, map = %f\n', C(i), sigma(j), map);
-%         p = [C(i) sigma(j) map];
-%         results = [results p'];
-%         
-%     end
-% end
-
 
 % eof
