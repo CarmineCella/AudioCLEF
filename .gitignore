@@ -1,5 +1,6 @@
 *.m~
 *.mat
+*.h5
 .DS_Store
 *.pkf
 /results

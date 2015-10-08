@@ -19,7 +19,7 @@ addpath([libs_folder, 'mfcc']);
 
 %% parameters and structures
 if ~exist('datasets_folder', 'var')
-    datasets_folder = '../../datasets';
+    datasets_folder = '../../datasets/';
 end
 %db_params = struct ('location', [datasets_folder, 'solosDb']);                % 20  classes
 %db_params = struct ('location', [datasets_folder, 'bird_fake']);              % 2   classes
