@@ -6,22 +6,22 @@ end
 
 [train_F, test_F, train_labels, test_labels, train_entries, test_entries] = AC_split_dataset (F, labels, entries, tt_ratio);
 
-% lm1 = train_labels;
-% lm2 = test_labels;
+lm1 = train_labels;
+lm2 = test_labels;
 
-Nclasses=numel(unique(train_labels));
-lm1 = zeros(Nclasses, numel(train_labels));
-
-for i = 1:numel(train_labels)
-    lm1(train_labels(i),i)=1;
-end
-
-Nclasses=numel(unique(test_labels));
-lm2 = zeros(Nclasses, numel(test_labels));
-
-for i = 1:numel(test_labels)
-    lm2(test_labels(i),i)=1;
-end
+% Nclasses=numel(unique(train_labels));
+% lm1 = zeros(Nclasses, numel(train_labels));
+% 
+% for i = 1:numel(train_labels)
+%     lm1(train_labels(i),i)=1;
+% end
+% 
+% Nclasses=numel(unique(test_labels));
+% lm2 = zeros(Nclasses, numel(test_labels));
+% 
+% for i = 1:numel(test_labels)
+%     lm2(test_labels(i),i)=1;
+% end
 
 subplot(211)
 imagesc (lm1)
