@@ -15,4 +15,4 @@ AC_make_torch_batch ('AC_torch_batch.h5', F, labels, entries, torch_tt_ratio)
 % system ('~/torch/install/bin/th torch/data_loading.lua')
 % system ('~/torch/install/bin/th torch/nn_classification.lua')
 
-    
+        
