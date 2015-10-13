@@ -10,23 +10,26 @@ require 'nn'
 require 'cunn'
 require 'gnuplot'
 
-print ('[neural network classification]\n')
-
-torch.setdefaulttensortype('torch.CudaTensor')
-
--- load data
-dofile('data_loading.lua')
-
 -- parameters (change here)
-inputs = trainset[1][1]:size()[1]
-outputs = nclasses[1][1]
 layers = 3
 hidden = {80, 80, 80}
 learningRate = 0.001
 maxIteration = 5000
 verbose = true
 plotting = true
+useCuda = true
 ---------------
+
+print ('[neural network classification]\n')
+if useCuda == true
+    torch.setdefaulttensortype('torch.CudaTensor')
+end
+
+-- load data
+dofile('data_loading.lua')
+
+inputs = trainset[1][1]:size()[1]
+outputs = nclasses[1][1]
 
 -- create a neural network
 mlp=nn.Sequential();  -- multi-layer perceptron
@@ -58,7 +61,9 @@ lout = nn.Linear(prev_neurons, outputs)
 mlp:add(lout)
 mlp:add(nn.LogSoftMax())
 
-mlp:cuda ()
+if useCuda == true
+    mlp:cuda ()
+end
 
 --  training
 print ('training the network...')
