@@ -12,7 +12,7 @@ require 'gnuplot'
 
 print ('[neural network classification]\n')
 
--- torch.setdefaulttensortype('torch.CudaTensor')
+torch.setdefaulttensortype('torch.CudaTensor')
 
 -- load data
 dofile('data_loading.lua')
@@ -58,7 +58,7 @@ lout = nn.Linear(prev_neurons, outputs)
 mlp:add(lout)
 mlp:add(nn.LogSoftMax())
 
--- mlp:cuda ()
+mlp:cuda ()
 
 --  training
 print ('training the network...')
