@@ -22,6 +22,7 @@ Current dependencies are:
 
 [MFCC library](http://labrosa.ee.columbia.edu/matlab/rastamat/) by D. Ellis
 
+[Torch7 library](http://labrosa.ee.columbia.edu/matlab/rastamat/) with its dependecies
 
 The main file invokes the computation function (called AC_batch) which takes several parameters and gives back the computed features, the labels, the classification results and other things.
 
