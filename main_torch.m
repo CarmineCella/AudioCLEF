@@ -10,8 +10,8 @@ end
 
 %% params
 
-torch_tt_ratio = .5;
-dimensions = 2;
+torch_tt_ratio = .25;
+dimensions = 0;
 
 
 [~, ~, F] = AC_standardization(F); % standardization is mandatory!

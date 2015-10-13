@@ -21,9 +21,9 @@ dofile('data_loading.lua')
 inputs = trainset[1][1]:size()[1]
 outputs = nclasses[1][1]
 layers = 3
-hidden = {80, 80, 60}
-learningRate = 0.01
-maxIteration = 2000
+hidden = {80, 80, 80}
+learningRate = 0.001
+maxIteration = 5000
 verbose = true
 plotting = true
 ---------------
