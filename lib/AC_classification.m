@@ -1,5 +1,12 @@
 function [acc, map, cmat] = AC_classification (F, labels, entries, Nclass, params)
 
+if strcmp (params.type, 'none')
+    acc  = 0;
+    map = 0;
+    cmat = 0;
+    return
+end
+
 if strcmp (params.structured_validation, 'yes')
     [train_F, test_F, train_labels, test_labels, ~, test_entries] = AC_split_dataset (F, labels, entries, params.tt_ratio);
 else

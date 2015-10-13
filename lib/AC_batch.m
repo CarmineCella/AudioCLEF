@@ -27,7 +27,13 @@ Nclass = length (unique (labels));
 [F, kernels] = AC_learning (F, learning_params);
 
 %% summarization
-[F, labels, entries] = AC_summarization (F, labels, entries, summarization_params);
+
+if exist('AC_features_and_labels_summarized.mat', 'file') == 2
+    load('AC_features_and_labels_summarized.mat');
+else
+    [F, labels, entries] = AC_summarization (F, labels, entries, summarization_params);
+    save('AC_features_and_labels_summarized.mat', 'F', 'labels', 'entries', '-v7.3');
+end
 
 %% distribution equalization (in number of samples per class)
 [F, labels, entries] = AC_distribution_eq (F, labels, entries, Nclass, equalization_params);

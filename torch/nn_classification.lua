@@ -7,9 +7,12 @@
 
 require 'torch'
 require 'nn'
+require 'cunn'
 require 'gnuplot'
 
 print ('[neural network classification]\n')
+
+-- torch.setdefaulttensortype('torch.CudaTensor')
 
 -- load data
 dofile('data_loading.lua')
@@ -19,10 +22,10 @@ inputs = trainset[1][1]:size()[1]
 outputs = nclasses[1][1]
 layers = 3
 hidden = {80, 80, 60}
-learningRate = 0.001
-maxIteration = 1000
-verbose = false
-plotting = false
+learningRate = 0.01
+maxIteration = 2000
+verbose = true
+plotting = true
 ---------------
 
 -- create a neural network
@@ -55,6 +58,8 @@ lout = nn.Linear(prev_neurons, outputs)
 mlp:add(lout)
 mlp:add(nn.LogSoftMax())
 
+-- mlp:cuda ()
+
 --  training
 print ('training the network...')
 
@@ -65,6 +70,7 @@ trainer.maxIteration = maxIteration
 -- trainer.shuffleIndices = false
 trainer.verbose = verbose
 
+--trainset = trainset:cuda()
 trainer:train(trainset)
 mlp:evaluate()
 
