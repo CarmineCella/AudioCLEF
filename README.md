@@ -16,13 +16,10 @@ It can be used with any dataset, the only constraint is that each class should b
 
 Current dependencies are:
 
-[ScatNetLight](https://github.com/edouardoyallon/ScatNetLight/releases) by E. Oyallon
-
-[scattering.m](https://github.com/lostanlen/scattering.m) by V. Lostanlen
-
-[MFCC library](http://labrosa.ee.columbia.edu/matlab/rastamat/) by D. Ellis
-
-[Torch7 library](http://labrosa.ee.columbia.edu/matlab/rastamat/) with its dependecies
+* [ScatNetLight](https://github.com/edouardoyallon/ScatNetLight/releases) by E. Oyallon;
+* [scattering.m](https://github.com/lostanlen/scattering.m) by V. Lostanlen;
+* [MFCC library](http://labrosa.ee.columbia.edu/matlab/rastamat/) by D. Ellis;
+* [Torch7 library](http://torch.ch/) with its dependecies.
 
 The main file invokes the computation function (called AC_batch) which takes several parameters and gives back the computed features, the labels, the classification results and other things.
 
