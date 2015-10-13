@@ -43,6 +43,10 @@ h5write(file,'/test_labels', lm2);
 h5create(file,'/test_entries',size(test_entries),'Datatype','double');
 h5write(file,'/test_entries', test_entries);
 
+nclasses =  numel(unique(labels));
+h5create(file,'/nclasses',size(nclasses), 'Datatype','double');
+h5write(file,'/nclasses', nclasses);
+
 plot (test_labels)
 
 end

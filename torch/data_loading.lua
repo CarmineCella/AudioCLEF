@@ -1,10 +1,15 @@
-----------------------------------------------------------------------
--- This script loads the training dataset
-----------------------------------------------------------------------
+----------------------
+-- data_loading.lua --
+----------------------
+
+-- this file load data from Matlab and put them in two torch tensors
+-- called respectively trainset and testset
+
 require 'torch'
 require 'hdf5'
-require 'gnuplot'
 
+
+print ('reading data from Matlab...')
 readFile = hdf5.open('../AC_torch_batch.h5', 'r')
 train_F = readFile:read('/train_F')
 train_F = train_F:all()
@@ -17,48 +22,55 @@ test_labels = readFile:read('/test_labels')
 test_F = test_F:all()
 test_labels = test_labels:all()
 
+nclasses = readFile:read('/nclasses'):all()
+
 readFile:close()
 
--- gnuplot.imagesc (train_F)
--- gnuplot.figure ()
--- gnuplot.imagesc (test_F)
+print ('preparing trainset...')
+n_tr = train_F:size(); -- [numInstances, dimEachInstance]
+k_tr = train_labels:size();
 
-n = train_F:size(); -- [numInstances,dimEachInstance]
-m = train_labels:size();
-t = test_F:size();
+trainset = {};
+function trainset:size() return n_tr[1] end -- examples
 
-dataset = {};
-function dataset:size() return n[1] end -- n[1] examples
+inp_tr=torch.Tensor(n_tr[2]);
+outp_tr=torch.Tensor(k_tr[2]);
 
-inp=torch.Tensor(n[2]);
-outp=torch.Tensor(m[2]);
-
-for i=1,dataset:size() do
-    for j=1,n[2] do
-        inp[j] = train_F[i][j];
+for i = 1, trainset:size() do
+    for j = 1, n_tr[2] do
+        inp_tr[j] = train_F[i][j];
     end
-    for j=1,m[2] do
-        outp[j] = train_labels[i][j];
+    for j = 1, k_tr[2] do
+        outp_tr[j] = train_labels[i][j];
     end
 
-	dataset[i]=  {inp,outp};  --dataset[i]={input(i,:), output(i,:)}
+	trainset[i]=  {inp_tr:clone(), outp_tr:clone()};
 end
 
--- get data set
-testp=torch.Tensor(t[2]);
-testset={};
-function testset:size() return t[1] end -- t[1] examples
+print ('preparing testset...\n')
+n_te = test_F:size(); -- [numInstances, dimEachInstance]
+k_te = test_labels:size();
 
-for i=1,t[1] do
-    for j=1,t[2] do
-        testp[j] = test_F[i][j];
-        print (testp[j])
+testset = {};
+function testset:size() return n_te[1] end -- examples
+
+inp_te = torch.Tensor(n_te[2]);
+outp_te = torch.Tensor(k_te[2]);
+
+for i = 1, testset:size() do
+    for j = 1, n_te[2] do
+        inp_te[j] = test_F[i][j];
     end
-    testset[i] = {testp};
-    print (testset[i][1])
+    for j = 1, k_te[2] do
+        outp_te[j] = test_labels[i][j];
+    end
+
+	testset[i] =  {inp_te:clone(), outp_te:clone()};
 end
 
 
--- Now dataset has dim dataset[n[1]][2] where
--- dataset[n[1]][1]: input(n[1],:) (vector of size n[2])
--- dataset[n[1]][2]: output(m[1],:) (idem)
+print ('nclasses      = ', nclasses[1][1]);
+print ('train samples = ', n_tr[1])
+print ('test samples  = ', n_te[1], '\n')
+
+-- eof
