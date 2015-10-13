@@ -21,7 +21,7 @@ useCuda = true
 ---------------
 
 print ('[neural network classification]\n')
-if useCuda == true
+if useCuda == true then
     torch.setdefaulttensortype('torch.CudaTensor')
 end
 
@@ -61,7 +61,7 @@ lout = nn.Linear(prev_neurons, outputs)
 mlp:add(lout)
 mlp:add(nn.LogSoftMax())
 
-if useCuda == true
+if useCuda == true then
     mlp:cuda ()
 end
 
