@@ -68,7 +68,6 @@ for i = 1, testset:size() do
 	testset[i] =  {inp_te:clone(), outp_te:clone()};
 end
 
-
 print ('nclasses      = ', nclasses[1][1]);
 print ('train samples = ', n_tr[1])
 print ('test samples  = ', n_te[1], '\n')

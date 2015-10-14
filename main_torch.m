@@ -13,7 +13,6 @@ end
 torch_tt_ratio = .25;
 dimensions = 0;
 
-
 [~, ~, F] = AC_standardization(F); % standardization is mandatory!
 if (dimensions ~= 0)
     F_orig = F;

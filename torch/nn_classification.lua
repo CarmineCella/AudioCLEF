@@ -10,14 +10,16 @@ require 'nn'
 require 'cunn'
 require 'gnuplot'
 
+package.path = package.path .. ';/torch/?.lua'
+
 -- parameters (change here)
-layers = 3
+layers = 1
 hidden = {80, 80, 80}
 learningRate = 0.001
-maxIteration = 5000
+maxIteration = 1000
 verbose = true
 plotting = true
-useCuda = true
+useCuda = false
 ---------------
 
 print ('[neural network classification]\n')
@@ -43,7 +45,7 @@ print ('\n')
 
 -- model
 local function nonlinearity()
-    return nn.Tanh()
+    return nn.ReLU()
 end
 
 prev_neurons = inputs
@@ -52,9 +54,9 @@ for i = 1, layers do
     --ln.weight:normal(0, 0.01)
     --ln.bias:fill(0)
     mlp:add(ln)
+    mlp:add(nn.Abs())
     mlp:add(nonlinearity())
-    mlp:add(nn.Dropout(0.4))
-
+    mlp:add(nn.Dropout(0.1))
     prev_neurons = hidden[i]
 end
 lout = nn.Linear(prev_neurons, outputs)
@@ -75,7 +77,6 @@ trainer.maxIteration = maxIteration
 -- trainer.shuffleIndices = false
 trainer.verbose = verbose
 
---trainset = trainset:cuda()
 trainer:train(trainset)
 mlp:evaluate()
 
@@ -102,12 +103,11 @@ for i = 1, tr_size[1] do
     end
 end
 
-print('** train accuracy:', nCorrect_tr/nSamples_tr*100, '% **\n')
 if plotting == true then
     gnuplot.imagesc (pred_tr)
 end
 
-print('testing the network on testset...')
+print('\ntesting the network on testset...')
 te_size = test_F:size();
 aux_te = torch.Tensor(te_size[2])
 pred_te = torch.Tensor(te_size[1], outputs)
@@ -131,11 +131,12 @@ for i = 1, te_size[1] do
     end
 end
 
-print('** test accuracy:', nCorrect_te/nSamples_te*100, '% **\n')
-
 if plotting == true then
     gnuplot.figure ()
     gnuplot.imagesc (pred_te)
 end
+
+print('\n** train accuracy:', nCorrect_tr/nSamples_tr*100, '% **')
+print('** test accuracy :', nCorrect_te/nSamples_te*100, '% **\n')
 
 -- eof
