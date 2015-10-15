@@ -7,20 +7,21 @@
 
 require 'torch'
 require 'nn'
-require 'cunn'
 require 'gnuplot'
 
-package.path = package.path .. ';/torch/?.lua'
-
 -- parameters (change here)
-layers = 1
+layers = 2
 hidden = {80, 80, 80}
 learningRate = 0.001
-maxIteration = 1000
+maxIteration = 2000
 verbose = true
 plotting = true
 useCuda = false
 ---------------
+
+if useCuda == true then
+  require 'cunn'
+end
 
 print ('[neural network classification]\n')
 if useCuda == true then
@@ -33,9 +34,6 @@ dofile('data_loading.lua')
 inputs = trainset[1][1]:size()[1]
 outputs = nclasses[1][1]
 
--- create a neural network
-mlp=nn.Sequential();  -- multi-layer perceptron
-
 print('input layer', '', 'neurons: ', inputs)
 for i = 1, layers do
     print ('hidden layer ', i, 'neurons: ', hidden[i])
@@ -44,28 +42,7 @@ print('output layer', '', 'neurons: ', outputs)
 print ('\n')
 
 -- model
-local function nonlinearity()
-    return nn.ReLU()
-end
-
-prev_neurons = inputs
-for i = 1, layers do
-    ln = nn.Linear(prev_neurons, hidden[i])
-    --ln.weight:normal(0, 0.01)
-    --ln.bias:fill(0)
-    mlp:add(ln)
-    mlp:add(nn.Abs())
-    mlp:add(nonlinearity())
-    mlp:add(nn.Dropout(0.1))
-    prev_neurons = hidden[i]
-end
-lout = nn.Linear(prev_neurons, outputs)
-mlp:add(lout)
-mlp:add(nn.LogSoftMax())
-
-if useCuda == true then
-    mlp:cuda ()
-end
+dofile ('model.lua')
 
 --  training
 print ('training the network...')

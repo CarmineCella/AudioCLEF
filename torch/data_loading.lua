@@ -8,7 +8,6 @@
 require 'torch'
 require 'hdf5'
 
-
 print ('reading data from Matlab...')
 readFile = hdf5.open('../AC_torch_batch.h5', 'r')
 train_F = readFile:read('/train_F')
