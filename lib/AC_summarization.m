@@ -35,6 +35,16 @@ switch (params.type)
             Fs(1, :, file_index) = mean(file_features{file_index}, 2);
         end
         Fs = reshape(Fs, nFeatures, nFiles);
+     case 'k-means'
+        disp ('summarizing by k-means...');
+        Fs = zeros(params.components, nFeatures, nFiles);       
+        for file_index = 1:nFiles          
+            [~, C] = kmeans (file_features{file_index}', params.components);
+            for cluster_index = 1:params.components
+                Fs(cluster_index, :, file_index) = C(cluster_index, :)';
+            end
+        end
+        Fs = reshape(Fs, params.components * nFeatures, nFiles);        
     case 'scat_summary'
         disp('summarizing with scattering...');
         opts{1}.time.T = 512;

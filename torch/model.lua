@@ -1,7 +1,6 @@
 -- model.lua
 
 require 'nn'
-
 if useCuda == true then
   require 'cunn'
 end

@@ -28,12 +28,15 @@ Nclass = length (unique (labels));
 
 %% summarization
 
-if exist('AC_features_and_labels_summarized.mat', 'file') == 2
-    load('AC_features_and_labels_summarized.mat');
-else
+saved_summarization = '';
+% if exist('AC_features_and_labels_summarized.mat', 'file') == 2
+%     load('AC_features_and_labels_summarized.mat');
+% end
+% if (strcmp (saved_summarization, evalc (['disp (summarization_params)'])) ~= true)
     [F, labels, entries] = AC_summarization (F, labels, entries, summarization_params);
-    save('AC_features_and_labels_summarized.mat', 'F', 'labels', 'entries', '-v7.3');
-end
+    saved_summarization = evalc (['disp (summarization_params)']);
+    save('AC_features_and_labels_summarized.mat', 'F', 'labels', 'entries', 'saved_summarization', '-v7.3');
+%end
 
 %% distribution equalization (in number of samples per class)
 [F, labels, entries] = AC_distribution_eq (F, labels, entries, Nclass, equalization_params);
@@ -43,7 +46,7 @@ end
 accv = zeros (Nfolds,1);
 mapv = zeros (Nfolds,1);
 
-parfor ifold = 1:Nfolds
+for ifold = 1:Nfolds
     fprintf ('classification fold %d\n', ifold);
     [accv(ifold), mapv(ifold)] = AC_classification (F, labels, entries, Nclass, classification_params);       
 end
