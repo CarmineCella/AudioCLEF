@@ -53,6 +53,21 @@ function [Fm, kernels] = AC_learning (F, params)
             [w, h] = nnmf (F, params.K);
             Fm = h; %%% mapping is directly given by activation functions
             kernels = w;
+        case 'feature_percentile'
+            %%
+            disp ('data sparsification by percentiles...');
+            percentiles = prctile(F, params.percentage, 2);
+            below_threshold = bsxfun(@lt, F, percentiles);
+            Fm = F;
+            Fm(below_threshold) = 0;
+            kernels = percentiles;
+            col_start = 200 * 1000;
+            col_length = 100;
+            cols = col_start + (1:col_length) - 1;
+            subplot(211);
+            imagesc(F(:,cols));
+            subplot(212);
+            imagesc(Fm(:,cols));
         otherwise
             error ('AudioCLEF error: invalid learning');
     end 
