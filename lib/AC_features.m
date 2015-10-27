@@ -61,7 +61,7 @@ for iFolder = 1 : length (foldernames)
     nFiles = length(filenames);
     file_features = cell(nFiles, 1);
     
-    parfor iFile = 1 : length(filenames) 
+    for iFile = 1 : length(filenames)
         filename = strcat (db_location, '/', foldernames(iFolder).name, ...
             '/',filenames(iFile).name);
         [~, ~, ext] = fileparts (filename);
@@ -89,22 +89,39 @@ for iFolder = 1 : length (foldernames)
             case 'scattering'
                 if strcmp (params.scat_norm, 'yes')
                     fprintf ('\tcomputing normalized scattering on %s...\n', filename);
-                     S = sc_propagate_renorm(temp, archs);
+                    S = sc_propagate_renorm(temp, archs);
                 else
                     fprintf ('\tcomputing scattering on %s...\n', filename);
-                     S = sc_propagate(temp, archs);
-                end               
-                file_features{iFile} = sc_format(S);
+                    S = sc_propagate(temp, archs);
+                end
+                [file_features{iFile}, formatted_layers] = sc_format(S);
             case 'alogc'
                 fprintf('\tcomputing average-log coefficients on %s...\n', filename);
                 [~, file_features{iFile}] = ...
                     AC_AverageLogCoeff(temp, params.alogc_win, ...
                     params.alogc_olap, params.alogc_nbands, ...
-                params.alogc_ncoeff, params.alogc_alpha);
+                    params.alogc_ncoeff, params.alogc_alpha);
             otherwise
                 error ('AudioCLEF error: invalid feature type');
         end
-
+        
+        switch params.detection_function
+            case 'spectrum_energy'
+                assert(strcmp(params.type, 'mfcc'));
+                detection_function = sum(file_features{iFile}, 2);
+            case 'spectrum_flux'
+                assert(strcmp(params.type, 'mfcc'));
+                detection_function = ...
+                    sum(abs(diff(file_features{iFile}, 2)));
+            case 'scattering_flux'
+                assert(strcmp(params.type, 'scattering'));
+                second_layer = formatted_layers{1+2};
+                detection_function = sum(second_layer, 2);
+            case 'scattering_energy'
+                assert(strcmp(params.type, 'scattering'))
+                    detection_function = sum(file_features{iFile}, 2);
+        end
+        
         if (strcmp (params.log_features, 'yes') == true)
             fprintf ('\t\tapplying log to features...\n');
             file_features{iFile} = ...

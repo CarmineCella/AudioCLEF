@@ -61,13 +61,6 @@ function [Fm, kernels] = AC_learning (F, params)
             Fm = F;
             Fm(below_threshold) = 0;
             kernels = percentiles;
-            col_start = 200 * 1000;
-            col_length = 100;
-            cols = col_start + (1:col_length) - 1;
-            subplot(211);
-            imagesc(F(:,cols));
-            subplot(212);
-            imagesc(Fm(:,cols));
         otherwise
             error ('AudioCLEF error: invalid learning');
     end 
