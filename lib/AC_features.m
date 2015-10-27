@@ -94,7 +94,7 @@ for iFolder = 1 : length (foldernames)
                     fprintf ('\tcomputing scattering on %s...\n', filename);
                     S = sc_propagate(temp, archs);
                 end
-                [file_features{iFile}, formatted_layers] = sc_format(S);
+                [file_features{iFile}] = sc_format(S);
             case 'alogc'
                 fprintf('\tcomputing average-log coefficients on %s...\n', filename);
                 [~, file_features{iFile}] = ...
