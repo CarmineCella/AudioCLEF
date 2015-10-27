@@ -105,23 +105,6 @@ for iFolder = 1 : length (foldernames)
                 error ('AudioCLEF error: invalid feature type');
         end
         
-        switch params.detection_function
-            case 'spectrum_energy'
-                assert(strcmp(params.type, 'mfcc'));
-                detection_function = sum(file_features{iFile}, 2);
-            case 'spectrum_flux'
-                assert(strcmp(params.type, 'mfcc'));
-                detection_function = ...
-                    sum(abs(diff(file_features{iFile}, 2)));
-            case 'scattering_flux'
-                assert(strcmp(params.type, 'scattering'));
-                second_layer = formatted_layers{1+2};
-                detection_function = sum(second_layer, 2);
-            case 'scattering_energy'
-                assert(strcmp(params.type, 'scattering'))
-                    detection_function = sum(file_features{iFile}, 2);
-        end
-        
         if (strcmp (params.log_features, 'yes') == true)
             fprintf ('\t\tapplying log to features...\n');
             file_features{iFile} = ...
