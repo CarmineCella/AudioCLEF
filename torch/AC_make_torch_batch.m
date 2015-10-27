@@ -67,16 +67,16 @@ switch params.mode
         end
         mkdir (traindir)
         cd (traindir)        
-        utrain = unique (train_entries)
+        utrain = unique (train_entries);
         for i = 1 : length (utrain)
             features = train_F (:, train_entries==utrain(i));
             label = lm_train (:, train_entries==utrain(i));
 
-            filename = sprintf ('%d_features.h5', i)
+            filename = sprintf ('%d_features.h5', i);
             h5create(filename,'/features',size(features),'Datatype','double');
             h5write(filename,'/features', features);            
             
-            filename = sprintf ('%d_label.h5', i)
+            filename = sprintf ('%d_label.h5', i);
             h5create(filename,'/label',size(label),'Datatype','double');
             h5write(filename,'/label', label);            
         end
@@ -87,7 +87,7 @@ switch params.mode
         end
         mkdir (testdir)
         cd (testdir)
-        utest = unique (test_entries)
+        utest = unique (test_entries);
         for i = 1 : length (utest)
             features = test_F (:, test_entries==utest(i));
             label = lm_train (:, test_entries==utest(i));

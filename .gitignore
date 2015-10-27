@@ -4,3 +4,5 @@
 .DS_Store
 *.pkf
 /results
+/torch_train
+/torch_test
