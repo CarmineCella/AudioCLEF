@@ -10,10 +10,11 @@ require 'nn'
 require 'gnuplot'
 
 -- parameters (change here)
-layers = 1
+layers = 0
 hidden = {80, 80, 80}
+addSpatialProcessing = true
 learningRate = 0.001
-maxIteration = 100
+maxIteration = 200
 verbose = true
 plotting = true
 useCuda = false
@@ -63,7 +64,7 @@ mlp:evaluate()
 print('\ntesting the network on trainset...')
 
 aux_tr=torch.Tensor(inputs)
-pred_tr=torch.Tensor (tr_samples, outputs)
+pred_tr=torch.Tensor(tr_samples, outputs)
 
 nSamples_tr = 0
 nCorrect_tr = 0
@@ -93,11 +94,6 @@ pred_te = torch.Tensor(te_samples, outputs)
 
 nSamples_te = 0
 nCorrect_te = 0
-
-print (tr_samples)
-print (te_samples)
-print (inputs)
-print (outputs)
 
 for i = 1, te_samples do
     aux_te = testset[i][1]

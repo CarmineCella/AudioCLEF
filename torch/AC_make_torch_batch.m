@@ -90,8 +90,8 @@ switch params.mode
         cd (testdir)
         utest = unique (test_entries);
         for i = 1 : length (utest)
-            features = test_F (:, test_entries==utest(i));
-            label = lm_train (:, test_entries==utest(i));
+            features = test_F(:, test_entries==utest(i));
+            label = lm_test(:, test_entries==utest(i));
 
             filename = sprintf ('%d_features.h5', i);
             h5create(filename,'/features',size(features),'Datatype','double');
