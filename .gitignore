@@ -3,6 +3,7 @@
 *.h5
 .DS_Store
 *.pkf
+*.t7
 /results
 /torch_train
 /torch_test
