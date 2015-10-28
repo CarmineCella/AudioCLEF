@@ -10,10 +10,10 @@ require 'nn'
 require 'gnuplot'
 
 -- parameters (change here)
-layers = 2
+layers = 1
 hidden = {80, 80, 80}
 learningRate = 0.001
-maxIteration = 2000
+maxIteration = 100
 verbose = true
 plotting = true
 useCuda = false
@@ -31,7 +31,10 @@ end
 -- load data
 dofile('data_loading.lua')
 
-inputs = trainset[1][1]:size()[1]
+tr_samples = train_sz[1][1]
+te_samples = test_sz[1][1]
+
+inputs = trainset[1][1]:size()[2]
 outputs = nclasses[1][1]
 
 print('input layer', '', 'neurons: ', inputs)
@@ -58,15 +61,15 @@ trainer:train(trainset)
 mlp:evaluate()
 
 print('\ntesting the network on trainset...')
-tr_size = train_F:size (); --test_F:size();
-aux_tr=torch.Tensor(tr_size[2])
-pred_tr=torch.Tensor(tr_size[1], outputs)
+
+aux_tr=torch.Tensor(inputs)
+pred_tr=torch.Tensor (tr_samples, outputs)
 
 nSamples_tr = 0
 nCorrect_tr = 0
 
-for i = 1, tr_size[1] do
-    aux_tr = train_F[i]
+for i = 1, tr_samples do
+    aux_tr = trainset[i][1]
     pred_tr[i] = mlp:forward(aux_tr)  -- get the prediction of the mlp
     local prediction = pred_tr[i]
     value, argmax = prediction:max(1)
@@ -85,15 +88,19 @@ if plotting == true then
 end
 
 print('\ntesting the network on testset...')
-te_size = test_F:size();
-aux_te = torch.Tensor(te_size[2])
-pred_te = torch.Tensor(te_size[1], outputs)
+aux_te = torch.Tensor(inputs)
+pred_te = torch.Tensor(te_samples, outputs)
 
 nSamples_te = 0
 nCorrect_te = 0
 
-for i = 1, te_size[1] do
-    aux_te = test_F[i]
+print (tr_samples)
+print (te_samples)
+print (inputs)
+print (outputs)
+
+for i = 1, te_samples do
+    aux_te = testset[i][1]
     pred_te[i] = mlp:forward(aux_te)  -- get the prediction of the mlp
     local prediction = pred_te[i]
     value, argmax = prediction:max(1)

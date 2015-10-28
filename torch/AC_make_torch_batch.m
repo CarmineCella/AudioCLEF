@@ -69,7 +69,7 @@ switch params.mode
         utrain = unique (train_entries);
         for i = 1 : length (utrain)
             features = train_F (:, train_entries==utrain(i));
-            label = mean (lm_train (:, train_entries==utrain(i)), 2);
+            label = lm_train (:, train_entries==utrain(i));
 
             filename = sprintf ('%d_features.h5', i);
             h5create(filename,'/features',size(features),'Datatype','double');
@@ -91,7 +91,7 @@ switch params.mode
         utest = unique (test_entries);
         for i = 1 : length (utest)
             features = test_F (:, test_entries==utest(i));
-            label = mean (lm_train (:, test_entries==utest(i)), 2);
+            label = lm_train (:, test_entries==utest(i));
 
             filename = sprintf ('%d_features.h5', i);
             h5create(filename,'/features',size(features),'Datatype','double');
@@ -108,8 +108,8 @@ switch params.mode
         if exist ('AC_torch_metadata.h5', 'file')
             delete ('AC_torch_metadata.h5')
         end
-        train_sz = size (train_F);
-        test_sz = size (test_F);
+        train_sz = [length(utrain) size(train_F, 1)];
+        test_sz = [length(utest) size(test_F, 1)];
         h5create ('AC_torch_metadata.h5', '/train_sz', size(train_sz), 'Datatype', 'double');
         h5write ('AC_torch_metadata.h5', '/train_sz', train_sz);
         h5create ('AC_torch_metadata.h5', '/test_sz',size (test_sz), 'Datatype', 'double');
