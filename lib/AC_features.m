@@ -61,7 +61,7 @@ for iFolder = 1 : length (foldernames)
     nFiles = length(filenames);
     file_features = cell(nFiles, 1);
     
-    for iFile = 1 : length(filenames)
+    parfor iFile = 1 : length(filenames)
         filename = strcat (db_location, '/', foldernames(iFolder).name, ...
             '/',filenames(iFile).name);
         [~, ~, ext] = fileparts (filename);
