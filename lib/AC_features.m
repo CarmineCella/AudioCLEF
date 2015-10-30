@@ -61,7 +61,7 @@ for iFolder = 1 : length (foldernames)
     nFiles = length(filenames);
     file_features = cell(nFiles, 1);
     
-    parfor iFile = 1 : length(filenames)
+    for iFile = 1 : length(filenames)
         filename = strcat (db_location, '/', foldernames(iFolder).name, ...
             '/',filenames(iFile).name);
         [~, ~, ext] = fileparts (filename);
@@ -115,6 +115,28 @@ for iFolder = 1 : length (foldernames)
             file_features{iFile} = medfilt1(file_features{iFile}, 7, ...
                 size(file_features{iFile}, 1), 2);
         end
+        if (params.cropping_percentile ~= 0)
+            switch params.detection_function
+                case 'spectrum_energy'
+                    assert(strcmp(params.type, 'mfcc'));
+                    detection_function = sum(file_features{iFile}, 1);
+                case 'spectrum_flux'
+                    assert(strcmp(params.type, 'mfcc'));
+                    detection_function = ...
+                        sum(abs(diff(file_features{iFile}, 1)));
+                case 'scattering_flux'
+                    assert(strcmp(params.type, 'scattering'));
+                    second_layer = formatted_layers{1+2};
+                    detection_function = sum(second_layer, 1);
+                case 'scattering_energy'
+                    assert(strcmp(params.type, 'scattering'))
+                    detection_function = sum(file_features{iFile},12);
+            end
+            percentile = ...
+                prctile(detection_function, params.cropping_percentile);
+            gate = detection_function > percentile;
+            file_features{iFile} = file_features{iFile}(:,gate);
+        end
     end
     
     % Get rid of empty files
@@ -125,7 +147,6 @@ for iFolder = 1 : length (foldernames)
     % Get number of frames per non-empty file
     nNonempty_files = sum(nonempty_files);
     nFrames_per_file = cellfun(@(x) size(x,2), file_features(nonempty_files));
-    
     
     % Retrieve file entries
     single_file_entries = file_ctx + (1:nNonempty_files).';
