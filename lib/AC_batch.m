@@ -1,5 +1,5 @@
 
-function [F, labels, entries, acc, map] = AC_batch (db_params, features_params, learning_params, summarization_params, ...
+function [F, labels, entries, acc, map, kernels] = AC_batch (db_params, features_params, learning_params, summarization_params, ...
     equalization_params, classification_params, Nfolds)
 saved_features = ''; % to decide if features must be recomputed
 saved_db = '';

@@ -1,11 +1,12 @@
 function [Fm, kernels] = AC_learning (F, params)
-    if (strcmp (params.pca_whitening, 'yes') == true)
-        fprintf ('applying pca-whitening...\n');
+Fc = F;
+if (strcmp (params.pca_whitening, 'yes') == true)
+    fprintf ('applying pca-whitening...\n');
     %     % from http://eric-yuan.me/ufldl-exercise-pca-image/
     %     x = F;
     %     xmean = mean(x, 1);
     %     x = bsxfun(@minus, x, xmean);
-    %     xRot = zeros(size(x)); 
+    %     xRot = zeros(size(x));
     %     [~, nfeatures] = size(x);
     %     sigma = x * x' ./ nfeatures;
     %     [U S V] = svd(sigma);
@@ -28,40 +29,43 @@ function [Fm, kernels] = AC_learning (F, params)
     %     xHat = U(:, 1:k) * U(:, 1:k)' * x;
     %     epsilon = 0.1;
     %     xPCAWhite = zeros(size(x));
-    %     xPCAWhite = diag(1./sqrt(diag(S) + epsilon)) * U' * x; 
-    % 
+    %     xPCAWhite = diag(1./sqrt(diag(S) + epsilon)) * U' * x;
+    %
     %     xZCAWhite = zeros(size(x));
     %     xZCAWhite = U * xPCAWhite;
     %     F = xZCAWhite;
-
+    
     bases = pca (F');
-    F = bases * F;
+    Fc = bases * F;
+end
 
-    end
-            
-    switch params.type
-        case 'none'
-            kernels = 0;
-            Fm = F;
-        case 'kmeans'
-            disp ('unsupervised learning by kmeans...');
-            [~, kernels] = kmeans (F.', params.K); %, 'Distance', 'cosine');
-            %kernels = SPKmeans (F.', params.K, 2);
-            Fm = (kernels * F); %%% mapping
-        case 'nnmf'
-            disp ('unsupervised learning by nnmf...');
-            [w, h] = nnmf (F, params.K);
-            Fm = h; %%% mapping is directly given by activation functions
-            kernels = w;
-        case 'feature_percentile'
-            %%
-            disp ('data sparsification by percentiles...');
-            percentiles = prctile(F, params.percentage, 2);
-            below_threshold = bsxfun(@lt, F, percentiles);
-            Fm = F;
-            Fm(below_threshold) = 0;
-            kernels = percentiles;
-        otherwise
-            error ('AudioCLEF error: invalid learning');
-    end 
+if params.feature_percentile ~= 0
+    fprintf ('applying feature percentile sparsification...\n');
+    percentiles = prctile(F, params.feature_percentile, 2);
+    below_threshold = bsxfun(@lt, F, percentiles);
+    Fc = F;
+    Fc(below_threshold) = 0;
+end
+switch params.type
+    case 'none'
+        kernels = 0;
+        Fm = F;
+    case 'kmeans'
+        disp ('unsupervised learning by kmeans...');
+        [~, ~, Fc] = AC_standardization(Fc); % standardization is mandatory!
+        [~, kernels] = kmeans (Fc.', params.K); %, 'Distance', 'cosine');
+        %Fm = (kernels * F); %%% mapping
+        nKernels = size(kernels, 1);
+        permutation = randperm(nKernels)
+        kernels = kernels(permutation, :);
+        Fm = conv2(F, kernels);
+    case 'nnmf'
+        disp ('unsupervised learning by nnmf...');
+        [w, h] = nnmf (Fc, params.K);
+        %Fm = h; %%% mapping is directly given by activation functions
+        kernels = w;
+        Fm = conv2 (F, w);
+    otherwise
+        error ('AudioCLEF error: invalid learning');
+end
 end

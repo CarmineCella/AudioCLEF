@@ -10,11 +10,11 @@ require 'nn'
 require 'gnuplot'
 
 -- parameters (change here)
-layers = 0
+layers = 1
 hidden = {80, 80, 80}
-addSpatialProcessing = true
+addThresholding = false -- needed for variable size samples
 learningRate = 0.001
-maxIteration = 200
+maxIteration = 1000
 verbose = true
 plotting = true
 useCuda = false

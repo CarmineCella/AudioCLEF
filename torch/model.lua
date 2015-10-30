@@ -15,13 +15,14 @@ local function nonlinearity()
     return nn.ReLU()
 end
 
-if addSpatialProcessing == true then
-    mlp:add (nn.SpatialBatchNormalization(inputs, 1e-7))
-    mlp:add (nn.ReLU ())
-    mlp:add (nn.SpatialAdaptiveMaxPooling (1, 1))
+if addThresholding == true then
+   mlp:add (nn.SpatialBatchNormalization(inputs, 1e-7))
+   mlp:add (nn.ReLU ())
 end
 
+mlp:add (nn.SpatialAdaptiveMaxPooling (1, 1))
 mlp:add (nn.View (inputs))
+
 prev_neurons = inputs
 for i = 1, layers do
     ln = nn.Linear(prev_neurons, hidden[i])
