@@ -7,13 +7,17 @@ if strcmp(params.type, 'none')
     return
 end
 
-labels_s = zeros(1, max(entries));
-entries_s = zeros(1, max(entries));
-nFiles = max(entries);
+usedFiles = unique (entries);
+nFiles = numel (usedFiles);
+labels_s = zeros(1, nFiles);
+entries_s = zeros(1, nFiles);
+
 file_features = cell(nFiles, 1);
 for file_index = 1:nFiles
-    file_features{file_index} = F(:, entries == file_index);
-    gi = labels(entries == file_index);
+    selection = (entries == usedFiles (file_index));
+    file_features{file_index} = F(:, selection);
+    gi = labels(selection);
+
     labels_s(file_index) = unique(gi);
     entries_s(file_index) = file_index;
 end
@@ -21,7 +25,7 @@ nFeatures = size(F, 1);
 
 switch (params.type)
     case 'mean_std'
-        disp ('summarizing by mean and std deviation...');
+        fprintf ('\tsummarizing by mean and std deviation...\n');
         Fs = zeros(2, nFeatures, nFiles);
         for file_index = 1:nFiles
             Fs(1, :, file_index) = mean(file_features{file_index}, 2);

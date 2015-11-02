@@ -12,7 +12,7 @@ switch params.type
     case 'kmeans'
         fprintf ('\tkmeans feature learning...\n');
         [~, ~, Fc] = AC_standardization(Fc); % standardization is mandatory!
-        [~, kernels] = kmeans (Fc.', params.K); %, 'Distance', 'cosine');
+        [~, kernels] = kmeans (Fc.', params.K, 'Distance', 'cosine');
     otherwise
         error ('AudioCLEF error: invalid learning');
 end
