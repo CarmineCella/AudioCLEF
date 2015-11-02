@@ -1,11 +1,11 @@
 
 function [F, labels, entries, acc, map, kernels] = AC_batch (db_params, features_params, learning_params, summarization_params, ...
-    equalization_params, classification_params, Nfolds)
+    equalization_params, batch_params, classification_params)
 saved_features = ''; % to decide if features must be recomputed
 saved_db = '';
-all_p = sprintf ('db_params:\n%s\nfeatures_params:\n%s\nlearning_params:\n%s\nsummarization_params:\n%s\nequalization_params:\n%s\nclassification_params:\n%s\n', ...
+all_p = sprintf ('db_params:\n%s\nfeatures_params:\n%s\nlearning_params:\n%s\nsummarization_params:\n%s\nequalization_params:\n%s\nclassification_params:\n%s\nbatch_params:\n%s\n', ...
     evalc (['disp (db_params)']), evalc (['disp (features_params)']), evalc (['disp (learning_params)']), ...
-    evalc (['disp (summarization_params)']), evalc (['disp (equalization_params)']), evalc (['disp (classification_params)']));
+    evalc (['disp (summarization_params)']), evalc (['disp (equalization_params)']), evalc (['disp (classification_params)']), evalc (['disp (batch_params)']));
 
 %% compute features
 tstart = tic;
@@ -23,39 +23,80 @@ end
 
 Nclass = length (unique (labels));
 
-%% learning and transformations
-[F, kernels] = AC_learning (F, learning_params);
-
-%% summarization
-
-saved_summarization = '';
-% if exist('AC_features_and_labels_summarized.mat', 'file') == 2
-%     load('AC_features_and_labels_summarized.mat');
-% end
-% if (strcmp (saved_summarization, evalc (['disp (summarization_params)'])) ~= true)
-    [F, labels, entries] = AC_summarization (F, labels, entries, summarization_params);
-    saved_summarization = evalc (['disp (summarization_params)']);
-    save('AC_features_and_labels_summarized.mat', 'F', 'labels', 'entries', 'saved_summarization', '-v7.3');
-%end
-
 %% distribution equalization (in number of samples per class)
 [F, labels, entries] = AC_distribution_eq (F, labels, entries, Nclass, equalization_params);
 
+%% summarization
+[F, labels, entries] = AC_summarization (F, labels, entries, summarization_params);
+save('AC_features_and_labels_summarized.mat', 'F', 'labels', 'entries', '-v7.3');
+
+    
 %% classification
+accv = zeros (batch_params.Nfolds,1);
+mapv = zeros (batch_params.Nfolds,1);
 
-accv = zeros (Nfolds,1);
-mapv = zeros (Nfolds,1);
-
-for ifold = 1:Nfolds
+for ifold = 1:batch_params.Nfolds
     fprintf ('classification fold %d\n', ifold);
-    [accv(ifold), mapv(ifold)] = AC_classification (F, labels, entries, Nclass, classification_params);       
+   
+    if strcmp (batch_params.structured_validation, 'yes')
+        [train_F, test_F, train_labels, test_labels, ~, test_entries] = ...
+            AC_split_dataset (F, labels, entries, batch_params.tt_ratio);
+    else
+        total_samples = size (F, 2);
+        test_samples = floor (total_samples * params.tt_ratio);
+        %train_samples = total_samples - test_samples;
+        
+        perm_idx = randperm(size (F, 2));
+        test_idx = perm_idx(1 : test_samples)';
+        train_idx = perm_idx(test_samples + 1:end)';
+        
+        test_labels = labels(test_idx);
+        train_labels = labels(train_idx);
+        test_F = F(:, test_idx);
+        train_F = F(:, train_idx);
+        
+        test_entries = entries(test_idx);
+    end
+    
+     %%% learning and transformations
+    kernels = AC_learning (F, learning_params);
+    if kernels~= 0
+        train_F = (kernels * train_F); %%% mapping
+        test_F = (kernels * test_F); %%% mapping
+        %tr_sz2 = size(train_F,2);
+        %te_sz2 = size(test_F,2);
+        %train_F = conv2(train_F, kernels);
+        %train_F = train_F(:, 1:tr_sz2);
+        %test_F = conv2(test_F, kernels);
+        %test_F = test_F(:, 1:te_sz2);
+    end
+    
+    %%% OLS feature selection / dimensionality reduction
+    if (batch_params.dimensions ~= 0)
+        fprintf ('\tdim. reduction: ');
+        [train_F, test_F, ~] = pls_multiclass_v2 (train_F, test_F, train_labels, ... 
+            Nclass, params.dimensions);
+    end
+    
+    %%% standardization
+    if strcmp (batch_params.standardize, 'yes') == true %% independent
+        fprintf ('\tstandardizing features...\n');
+        [moys, stddevs, train_F] = AC_standardization (train_F);
+        
+        numFrames = size (test_F, 2);
+        test_F = (test_F - repmat (moys,1,numFrames))./repmat(stddevs,1,numFrames);
+    end
+
+    [accv(ifold), mapv(ifold)] = AC_classification (train_F, train_labels, ...
+        test_F, test_labels, test_entries, Nclass, classification_params);       
 end
 
 acc = mean (accv); map = mean (mapv); 
 
 telapsed = toc (tstart);
 fprintf ('\n');
-results = sprintf ('[final results]\nacc = %f, map = %f, (performance time: %f sec.)\n', acc, map, telapsed);
+results = sprintf ('[final results]\nacc = %f, map = %f, (performance time: %f sec.)\n', ...
+    acc, map, telapsed);
 disp (results);
 
 %% store results

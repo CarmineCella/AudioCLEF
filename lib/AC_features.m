@@ -173,5 +173,13 @@ F = [folder_features{nonempty_folders}];
 labels = [folder_labels{nonempty_folders}];
 entries = [folder_entries{nonempty_folders}];
 
+if params.feature_percentile ~= 0
+    fprintf ('\tapplying feature percentile sparsification...\n');
+    percentiles = prctile(F, params.feature_percentile, 2);
+    below_threshold = bsxfun(@lt, F, percentiles);
+    Fc = F;
+    Fc(below_threshold) = 0;
+end
+
 fprintf ('\ntotal number of files: %d\n\n', file_ctx);
 end

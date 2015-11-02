@@ -1,22 +1,22 @@
 function AC_make_torch_batch (F, labels, entries, params)
 
+if strcmp (params.type, 'none') == true
+    return
+end
+
+disp ('exporting data to Torch...');
+
 file = 'AC_torch_batch.h5';
 testdir = 'torch_test';
 traindir = 'torch_train';
 
 nclasses =  numel(unique(labels));
         
-[~, ~, F] = AC_standardization(F); % standardization is mandatory!
-
-if (params.dimensions ~= 0)
-    F_orig = F;
-    [mu,E,V] = AC_pca (F');
-    M = dimensions; 
-    F = (V(:,1:M)')*(F-repmat(mu',[1 size(F,2)])); 
-end
-
-
 [train_F, test_F, train_labels, test_labels, train_entries, test_entries] = AC_split_dataset (F, labels, entries, params.tt_ratio);
+[moys, stddevs, train_F] = AC_standardization (train_F);
+
+numFrames = size (test_F, 2);
+test_F = (test_F - repmat (moys,1,numFrames))./repmat(stddevs,1,numFrames);
 
 switch params.type
     case 'label'

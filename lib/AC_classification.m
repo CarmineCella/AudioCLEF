@@ -1,4 +1,5 @@
-function [acc, map, cmat] = AC_classification (F, labels, entries, Nclass, params)
+function [acc, map, cmat] = AC_classification (train_F, train_labels, ...
+    test_F, test_labels, test_entries, Nclass, params)
 
 if strcmp (params.type, 'none')
     acc  = 0;
@@ -7,50 +8,10 @@ if strcmp (params.type, 'none')
     return
 end
 
-if strcmp (params.structured_validation, 'yes')
-    [train_F, test_F, train_labels, test_labels, ~, test_entries] = AC_split_dataset (F, labels, entries, params.tt_ratio);
-else
-    total_samples = size (F, 2);
-    test_samples = floor (total_samples * params.tt_ratio);
-    %train_samples = total_samples - test_samples;
-    
-    perm_idx = randperm(size (F, 2));
-    test_idx = perm_idx(1 : test_samples)';
-    train_idx = perm_idx(test_samples + 1:end)';
-    
-    test_labels = labels(test_idx);
-    train_labels = labels(train_idx);
-    test_F = F(:, test_idx);
-    train_F = F(:, train_idx);
-    
-    test_entries = entries(test_idx);
-end
-
-%%% OLS feature selection / dimensionality reduction
-if (params.dimensions ~= 0)
-    fprintf ('\tdim. reduction: ');
-    [train_F, test_F, ~] = pls_multiclass_v2 (train_F, test_F, train_labels, Nclass, params.dimensions);
-end
-
-if strcmp (params.standardize, 'yes') == true %% independent
-    fprintf ('\tstandardizing features...\n');
-    [moys, stddevs, train_F] = AC_standardization (train_F);
-    
-    numFrames = size (test_F, 2);
-    test_F = (test_F - repmat (moys,1,numFrames))./repmat(stddevs,1,numFrames);
-end
-
 switch params.type
     case 'SVM'
         fprintf ('\tsvm: ');
-        %%NB: old version from Mia's code
-        %svm_opt = sprintf('-s 0 -t %d -h 0 -b 1 -g %f -c %f', params.svm_kernel, params.svm_gamma, params.svm_C);
-        % convert features to single precision (required by LIBSVM)
-        %train_F = single(train_F);
-        %test_F = single(test_F);
-        %         model = svmtrain1(train_labels', train_F', svm_opt);
-        %         [~,  ~, probs] = svmpredict1(test_labels', test_F', model, '-b 1');
-        %
+
         sigma = mean(sqrt(sum(train_F.^2,1)))*params.svm_sigma_v;
         
         if strcmp (params.svm_kernel, 'rbf') == true
@@ -73,10 +34,8 @@ switch params.type
         end
         fprintf ('\trandom forest...\n');
         model = TreeBagger(params.RF_ntree, train_F', train_labels_s, ...
-            'Method', 'classification', 'oobvarimp','on'); %, 'Fboot', params.RF_fboot, ...
-            %'NVarToSample', params.RF_var2samp);
+            'Method', 'classification', 'oobvarimp','on', 'Fboot', params.RF_fboot);
         [~, probs] = model.predict (test_F');
-        [obs vars] = size(model.X);
         num_oob_per_tree = sum(sum(model.OOBIndices))/params.RF_ntree;
         fprintf('\tin-bag samples: %d/%d\n', floor(num_oob_per_tree), size(train_F',1))
         
