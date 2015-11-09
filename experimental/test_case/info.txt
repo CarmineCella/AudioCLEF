@@ -1,0 +1,10 @@
+These results have been obtained by computing spectral clustering on the minibird dataset.
+Classes 22 and 140 appear to be close (number 2 and 6 in the plot) so I took
+the files
+
+LIFECLEF2014_BIRDAMAZON_XC_WAV_RN11846.wav
+LIFECLEF2014_BIRDAMAZON_XC_WAV_RN400.wav
+
+each one belonging to one class and compared. The wav file in this folder
+shows how the two classes are similar after having acceleretad and transposed
+one of the two classes.

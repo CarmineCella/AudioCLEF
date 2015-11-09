@@ -28,6 +28,9 @@ for i = 1, trainset:size() do
     fy = hdf5.open ('../torch_train/' .. i .. '_label.h5')
     out_tr=fy:read('/label'):all ()[1]; -- getting a single label since they are the same
 	trainset[i]=  {inp_tr:view(1, train_sz[2][1], 1, sz[1]):clone(), out_tr:view (1):clone()};
+    fx:close ()
+    fy:close ()
+
 end
 
 print ('preparing testset...\n')
@@ -42,6 +45,9 @@ for i = 1, testset:size() do
     fy = hdf5.open ('../torch_test/' .. i .. '_label.h5')
     out_te=fy:read('/label'):all ()[1]; -- getting a single label since they are the same
 	testset[i] =  {inp_te:view(1, test_sz[2][1], 1, sz[1]):clone(), out_te:view(1):clone()};
+    fx:close ()
+    fy:close ()
+
 end
 
 print ('nclasses      = ', nclasses[1][1]);

@@ -7,12 +7,12 @@
 
 require 'torch'
 require 'nn'
-require 'gnuplot'
+--require 'gnuplot'
 
 -- parameters (change here)
-layers = 1
-hidden = {80, 80, 80}
-addThresholding = false -- needed for variable size samples
+layers = 2
+hidden = {20, 20, 80}
+addThresholding = false
 learningRate = 0.001
 maxIteration = 1000
 verbose = true
@@ -85,7 +85,7 @@ for i = 1, tr_samples do
 end
 
 if plotting == true then
-    gnuplot.imagesc (pred_tr)
+--    gnuplot.imagesc (pred_tr)
 end
 
 print('\ntesting the network on testset...')
@@ -112,8 +112,8 @@ for i = 1, te_samples do
 end
 
 if plotting == true then
-    gnuplot.figure ()
-    gnuplot.imagesc (pred_te)
+--    gnuplot.figure ()
+--    gnuplot.imagesc (pred_te)
 end
 
 print('\n** train accuracy:', nCorrect_tr/nSamples_tr*100, '% **')

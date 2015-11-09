@@ -32,11 +32,11 @@ switch (params.type)
             Fs(2, :, file_index) = std(file_features{file_index}, 0, 2);
         end
         Fs = reshape(Fs, 2 * nFeatures, nFiles);
-     case 'mean'
-        disp ('summarizing by mean...');
+     case 'max'
+        disp ('summarizing by max...');
         Fs = zeros(1, nFeatures, nFiles);
         for file_index = 1:nFiles
-            Fs(1, :, file_index) = mean(file_features{file_index}, 2);
+            Fs(1, :, file_index) = max(file_features{file_index},[], 2);
         end
         Fs = reshape(Fs, nFeatures, nFiles);
      case 'k-means'

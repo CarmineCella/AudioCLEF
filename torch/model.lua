@@ -30,7 +30,7 @@ for i = 1, layers do
     --ln.bias:fill(0)
     mlp:add(ln)
     mlp:add(nonlinearity())
-    mlp:add(nn.Dropout(0.1))
+    mlp:add(nn.Dropout(0.5))
     prev_neurons = hidden[i]
 end
 lout = nn.Linear(prev_neurons, outputs)
