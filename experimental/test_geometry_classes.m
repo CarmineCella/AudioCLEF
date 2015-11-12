@@ -1,7 +1,12 @@
 % tests on class geometry
 %
 
-addpath (genpath ('../HSC'));
+addpath (genpath ('../../HSC'));
+addpath (genpath ('../lib'));
+
+
+summarization_params = struct ('type', 'mean_std', ...
+    'components', 15);
 
 params = struct ('filename', '', ...
     'T', 2^11, ...
@@ -15,16 +20,28 @@ params = struct ('filename', '', ...
 order = length (params.variance_scales); % NB: the size of the variance_scales vector
                                          % determines the order of the network
 
+nfeatures = 80;
+nclass = 50;
+
 %% Sum all vectors within each class
 F_sum = AC_summarization(F, labels, entries, summarization_params);
-F_byclass = sum(reshape(F_sum, 80, 15, 15), 3);
+%%
 
+F_byclass = zeros (nfeatures, nclass);
+for class_index = 1:nclass
+    selection = (labels == class_index);
+    F_byclass(:, class_index) = sum (F_sum(:, selection));
+end
+
+%%F_byclass = sum(reshape(F_sum, nfeatures, nclass, nclass), 3);
+%%
 sc_lin = F_byclass;
 sc_log = log1p (1e-12 * sc_lin);
 imagesc(sc_log)
+
 %% decompose
 s = size (sc_log);
-indexes = zeros (1, s (2));
+indexes = zeros (1, s(2));
 for i = 1 : s(2)
     indexes (1, i) = i;
 end
