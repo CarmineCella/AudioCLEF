@@ -10,10 +10,10 @@ require 'nn'
 --require 'gnuplot'
 
 -- parameters (change here)
-layers = 3
+layers = 2
 hidden = {80, 80, 80, 60, 20}
 learningRate = 0.001
-maxIteration = 1500
+maxIteration = 2500
 verbose = true
 ---------------
 

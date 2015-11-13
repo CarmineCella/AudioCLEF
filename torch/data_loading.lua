@@ -19,7 +19,7 @@ readFile:close()
 print ('preparing trainset...')
 
 trainset = {};
-function trainset:size() return train_sz[1][1]-1 end -- examples
+function trainset:size() return train_sz[1][1] end -- examples
 
 for i = 1, trainset:size() do
     fx = hdf5.open ('../torch_train/' .. i .. '_features.h5')
@@ -36,7 +36,7 @@ end
 print ('preparing testset...\n')
 
 testset = {};
-function testset:size() return test_sz[1][1]-1 end -- examples
+function testset:size() return test_sz[1][1] end -- examples
 
 for i = 1, testset:size() do
     fx = hdf5.open ('../torch_test/' .. i .. '_features.h5')
