@@ -43,6 +43,7 @@ folder_labels = cell(nFolders, 1);
 file_ctx = 0; % absolute file counter (incremented by nNonempty_files, not by 1)
 folder_ctx = 0; % absolute folder counter
 
+sizes  = [];
 for iFolder = 1 : length (foldernames)
     filenames = dir(strcat (db_location, '/', foldernames(iFolder).name));
     filenames = filenames (3 : length(filenames));
@@ -137,8 +138,10 @@ for iFolder = 1 : length (foldernames)
             gate = detection_function > percentile;
             file_features{iFile} = file_features{iFile}(:,gate);
         end
+        
+        sizes = [sizes size(file_features{iFile}, 2)];
     end
-    
+
     % Get rid of empty files
     empty_files = cellfun(@isempty, file_features);
     nonempty_files = ~empty_files;
@@ -164,6 +167,13 @@ for iFolder = 1 : length (foldernames)
     
     file_ctx = file_ctx + nNonempty_files;
 end
+
+figure
+stem (sizes);
+hold on
+plot (median(sizes) .* ones(1, size(sizes,2)))
+plot (mean(sizes) .* ones(1, size(sizes,2)))
+title ('Distribution of frames in dataset')
 
 % Get rid of empty folders
 empty_folders = cellfun(@isempty, folder_features);

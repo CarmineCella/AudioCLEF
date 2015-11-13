@@ -25,6 +25,14 @@ end
 Nclass = length (unique (labels));
 [F, labels, entries] = AC_distribution_eq (F, labels, entries, Nclass, equalization_params);
 
+%% learning    
+kernels = AC_learning (F, learning_params);
+    
+
+%% summarization
+[F, labels, entries] = AC_summarization (F, labels, ...
+    entries, summarization_params);
+
 %% classification
 accv = zeros (batch_params.Nfolds,1);
 mapv = zeros (batch_params.Nfolds,1);
@@ -52,26 +60,13 @@ for ifold = 1:batch_params.Nfolds
         test_entries = entries(test_idx);
     end
     
-    %%% learning and transformations
-    kernels = AC_learning (F, learning_params);
+    %%% transformations
     if kernels~= 0
         train_F = (kernels * train_F); %%% mapping
         test_F = (kernels * test_F); %%% mapping
-%         tr_sz2 = size(train_F,2);
-%         te_sz2 = size(test_F,2);
-%         train_F = conv2(train_F, kernels);
-%         train_F = train_F(:, 1:tr_sz2);
-%         test_F = conv2(test_F, kernels);
-%         test_F = test_F(:, 1:te_sz2);
     end
     
-
-    %% summarization
-    [train_F, train_labels, train_entries] = AC_summarization (train_F, train_labels, ...
-        train_entries, summarization_params);
-    [test_F, test_labels, test_entries] = AC_summarization (test_F, test_labels, ...
-        test_entries, summarization_params);
-    
+   
     %%% OLS feature selection / dimensionality reduction
     if (batch_params.dimensions ~= 0)
         fprintf ('\tdim. reduction: ');

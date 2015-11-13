@@ -1,23 +1,12 @@
 -- model.lua
 
 require 'nn'
-if useCuda == true then
-  require 'cunn'
-end
+
 
 mlp=nn.Sequential();  -- multi-layer perceptron
 
-if useCuda == true then
-    mlp:cuda ()
-end
-
 local function nonlinearity()
     return nn.ReLU()
-end
-
-if addThresholding == true then
-   mlp:add (nn.SpatialBatchNormalization(inputs, 1e-7))
-   mlp:add (nn.ReLU ())
 end
 
 mlp:add (nn.SpatialAdaptiveMaxPooling (1, 1))

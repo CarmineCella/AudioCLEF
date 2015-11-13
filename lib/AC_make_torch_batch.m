@@ -70,15 +70,15 @@ switch params.mode
         for i = 1 : length (utrain)
             features = train_F (:, train_entries==utrain(i));
             label = lm_train (:, train_entries==utrain(i));
-
             filename = sprintf ('%d_features.h5', i);
+
             h5create(filename,'/features',size(features),'Datatype','double');
-            h5write(filename,'/features', features);            
+            h5write(filename,'/features', features);
             %save (filename, 'features');
-             
+            
             filename = sprintf ('%d_label.h5', i);
-            h5create(filename,'/label',size(label),'Datatype','double');
-            h5write(filename,'/label', label);            
+            h5create(filename,'/label', size(label),'Datatype','double');
+            h5write(filename,'/label', label);
             %save (filename, 'label');
         end        
         cd ..
@@ -92,15 +92,15 @@ switch params.mode
         for i = 1 : length (utest)
             features = test_F(:, test_entries==utest(i));
             label = lm_test(:, test_entries==utest(i));
-
             filename = sprintf ('%d_features.h5', i);
+            
             h5create(filename,'/features',size(features),'Datatype','double');
-            h5write(filename,'/features', features);            
+            h5write(filename,'/features', features);
             %save (filename, 'features');
             
             filename = sprintf ('%d_label.h5', i);
-            h5create(filename,'/label',size(label),'Datatype','double');
-            h5write(filename,'/label', label);     
+            h5create(filename,'/label', size(label),'Datatype','double');
+            h5write(filename,'/label', label);
             %save (filename, 'label');
         end
         cd ..
@@ -110,6 +110,74 @@ switch params.mode
         end
         train_sz = [length(utrain) size(train_F, 1)];
         test_sz = [length(utest) size(test_F, 1)];
+        h5create ('AC_torch_metadata.h5', '/train_sz', size(train_sz), 'Datatype', 'double');
+        h5write ('AC_torch_metadata.h5', '/train_sz', train_sz);
+        h5create ('AC_torch_metadata.h5', '/test_sz',size (test_sz), 'Datatype', 'double');
+        h5write ('AC_torch_metadata.h5', '/test_sz', test_sz);        
+        h5create('AC_torch_metadata.h5','/nclasses',size(nclasses), 'Datatype','double');
+        h5write('AC_torch_metadata.h5','/nclasses', nclasses);        
+    case 'frame_splitted'
+        % train data
+        if exist (traindir, 'dir')
+            rmdir (traindir, 's')
+        end
+        mkdir (traindir)
+        cd (traindir)        
+        utrain = unique (train_entries);
+        train_ctx = 1;
+        for i = 1 : length (utrain)
+            features = train_F (:, train_entries==utrain(i));
+            label = lm_train (:, train_entries==utrain(i));
+
+            for j = 1 : size (features,2)
+                filename = sprintf ('%d_features.h5', train_ctx);
+                slice = features(:, j);
+                l = label(:,j);
+                h5create(filename,'/features',size(slice),'Datatype','double');
+                h5write(filename,'/features', slice);
+                %save (filename, 'features');
+                
+                filename = sprintf ('%d_label.h5', train_ctx);
+                h5create(filename,'/label', size(l),'Datatype','double');
+                h5write(filename,'/label', l);
+                %save (filename, 'label');
+                train_ctx = train_ctx + 1;
+            end
+        end        
+        cd ..
+        % test data
+        if exist (testdir, 'dir')
+            rmdir (testdir, 's')
+        end
+        mkdir (testdir)
+        cd (testdir)
+        utest = unique (test_entries);
+        test_ctx = 1;
+        for i = 1 : length (utest)
+            features = test_F(:, test_entries==utest(i));
+            label = lm_test(:, test_entries==utest(i));
+            for j = 1 : size (features,2)
+                filename = sprintf ('%d_features.h5', test_ctx);
+                slice = features(:, j);
+                l = label(:,j);
+                h5create(filename,'/features',size(slice),'Datatype','double');
+                h5write(filename,'/features', slice);
+                %save (filename, 'features');
+                
+                filename = sprintf ('%d_label.h5', test_ctx);
+                h5create(filename,'/label', size(l),'Datatype','double');
+                h5write(filename,'/label', l);
+                %save (filename, 'label');
+                test_ctx = test_ctx + 1;
+            end
+        end
+        cd ..
+        
+        if exist ('AC_torch_metadata.h5', 'file')
+            delete ('AC_torch_metadata.h5')
+        end
+        train_sz = [train_ctx-1 size(train_F, 1)];
+        test_sz = [test_ctx-1 size(test_F, 1)];
         h5create ('AC_torch_metadata.h5', '/train_sz', size(train_sz), 'Datatype', 'double');
         h5write ('AC_torch_metadata.h5', '/train_sz', train_sz);
         h5create ('AC_torch_metadata.h5', '/test_sz',size (test_sz), 'Datatype', 'double');

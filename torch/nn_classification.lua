@@ -10,30 +10,20 @@ require 'nn'
 --require 'gnuplot'
 
 -- parameters (change here)
-layers = 2
-hidden = {20, 20, 80}
-addThresholding = false
+layers = 3
+hidden = {80, 80, 80, 60, 20}
 learningRate = 0.001
-maxIteration = 1000
+maxIteration = 1500
 verbose = true
-plotting = true
-useCuda = false
 ---------------
 
-if useCuda == true then
-  require 'cunn'
-end
-
 print ('[neural network classification]\n')
-if useCuda == true then
-    torch.setdefaulttensortype('torch.CudaTensor')
-end
 
 -- load data
 dofile('data_loading.lua')
 
-tr_samples = train_sz[1][1]
-te_samples = test_sz[1][1]
+tr_samples = trainset:size()
+te_samples = testset:size()
 
 inputs = trainset[1][1]:size()[2]
 outputs = nclasses[1][1]
@@ -84,10 +74,6 @@ for i = 1, tr_samples do
     end
 end
 
-if plotting == true then
---    gnuplot.imagesc (pred_tr)
-end
-
 print('\ntesting the network on testset...')
 aux_te = torch.Tensor(inputs)
 pred_te = torch.Tensor(te_samples, outputs)
@@ -109,11 +95,6 @@ for i = 1, te_samples do
     if argmax[1] == testset[i][2][1] then
         nCorrect_te = nCorrect_te + 1
     end
-end
-
-if plotting == true then
---    gnuplot.figure ()
---    gnuplot.imagesc (pred_te)
 end
 
 print('\n** train accuracy:', nCorrect_tr/nSamples_tr*100, '% **')
