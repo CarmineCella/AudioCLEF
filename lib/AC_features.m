@@ -116,27 +116,72 @@ for iFolder = 1 : length (foldernames)
             file_features{iFile} = medfilt1(file_features{iFile}, 7, ...
                 size(file_features{iFile}, 1), 2);
         end
-        if (params.cropping_percentile ~= 0)
+        if (params.nCrops ~= 0)
+            F_in = file_features{iFile};
+            [nFeatures, nFrames] = size(F_in);
             switch params.detection_function
                 case 'spectrum_energy'
                     assert(strcmp(params.type, 'mfcc'));
-                    detection_function = sum(file_features{iFile}, 1);
+                    detection_function = sum(F_in, 1);
                 case 'spectrum_flux'
                     assert(strcmp(params.type, 'mfcc'));
                     detection_function = ...
-                        sum(abs(diff(file_features{iFile}, 1)));
+                        sum(abs(diff(F_in, 1)));
                 case 'scattering_flux'
                     assert(strcmp(params.type, 'scattering'));
                     second_layer = formatted_layers{1+2};
                     detection_function = sum(second_layer, 1);
                 case 'scattering_energy'
                     assert(strcmp(params.type, 'scattering'))
-                    detection_function = sum(file_features{iFile},12);
+                    detection_function = sum(F_in,12);
             end
-            percentile = ...
-                prctile(detection_function, params.cropping_percentile);
-            gate = detection_function > percentile;
-            file_features{iFile} = file_features{iFile}(:,gate);
+            if nFrames <= params.crop_length
+                nReplications = ceil(params.crop_length / nFrames);
+                F_in = repmat(F_in, 1, nReplications);
+                detection_function = ...
+                    repmat(detection_function, 1, nReplications);
+                nFrames = size(F_in, 2);
+            end
+            half_crop_length = round(params.crop_length / 2);  
+            [peaks, locations] = findpeaks(detection_function, ...
+                'SortStr', 'descend', ...
+                'MinPeakDistance', params.crop_length, ...
+                'NPeaks', params.nCrops) ;
+            F_out = zeros(nFeatures, params.crop_length, params.nCrops);
+            for crop_index = 1:params.nCrops
+                peak_index = mod(crop_index - 1, length(locations)) + 1;
+                location = locations(peak_index);
+                start = location - half_crop_length;
+                stop = location + half_crop_length - 1;
+                range = start:stop;
+                mod_range = mod(range - 1, nFrames) + 1;
+                F_out(:, :, crop_index) = F_in(:, mod_range);
+            end
+            % backward-comptability to get 2d output
+            F_out = ...
+                reshape(F_out, [nFeatures, params.crop_length * params.nCrops]);
+            subplot(311)
+            findpeaks(detection_function, ...
+                'SortStr', 'descend', ...
+                'MinPeakDistance', params.crop_length, ...
+                'NPeaks', params.nCrops) ;
+            subplot(312);
+            imagesc (log(1e3 * F_in));
+            hold on;
+            for peak_index = 1:length(locations)
+                location = locations(peak_index);
+                start = location - half_crop_length;
+                stop = location + half_crop_length - 1;
+                mod_start = mod(start - 1, nFrames) + 1;
+                mod_stop = mod(stop - 1, nFrames) + 1;
+                line([mod_start, mod_start], [1, nFeatures], 'Color', 'r');
+                line([mod_stop, mod_stop], [1, nFeatures], 'Color', 'k');
+            end
+            hold off;
+            subplot (313)
+            imagesc (log(1e3 * F_out));
+            set(gcf, 'WindowStyle', 'docked')
+            file_features{iFile} = F_out;
         end
         
         sizes = [sizes size(file_features{iFile}, 2)];

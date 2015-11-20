@@ -11,9 +11,9 @@ require 'nn'
 
 -- parameters (change here)
 layers = 2
-hidden = {80, 80, 80, 60, 20}
+hidden = {80, 80, 80}
 learningRate = 0.001
-maxIteration = 2500
+maxIteration = 1000
 verbose = true
 ---------------
 

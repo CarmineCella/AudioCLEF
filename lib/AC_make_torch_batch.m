@@ -72,6 +72,7 @@ switch params.mode
             label = lm_train (:, train_entries==utrain(i));
             filename = sprintf ('%d_features.h5', i);
 
+            %features=features.';
             h5create(filename,'/features',size(features),'Datatype','double');
             h5write(filename,'/features', features);
             %save (filename, 'features');
@@ -94,6 +95,7 @@ switch params.mode
             label = lm_test(:, test_entries==utest(i));
             filename = sprintf ('%d_features.h5', i);
             
+            %features=features.';
             h5create(filename,'/features',size(features),'Datatype','double');
             h5write(filename,'/features', features);
             %save (filename, 'features');

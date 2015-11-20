@@ -23,11 +23,11 @@ function trainset:size() return train_sz[1][1] end -- examples
 
 for i = 1, trainset:size() do
     fx = hdf5.open ('../torch_train/' .. i .. '_features.h5')
-    inp_tr=fx:read('/features'):all ();
+    inp_tr=fx:read('/features'):all () --:transpose (1,2);
     sz = inp_tr:size ();
     fy = hdf5.open ('../torch_train/' .. i .. '_label.h5')
     out_tr=fy:read('/label'):all ()[1]; -- getting a single label since they are the same
-	trainset[i]=  {inp_tr:view(1, train_sz[2][1], 1, sz[1]):clone(), out_tr:view (1):clone()};
+	trainset[i]=  {inp_tr:clone(), out_tr:view (1):clone()};
     fx:close ()
     fy:close ()
 
@@ -40,11 +40,11 @@ function testset:size() return test_sz[1][1] end -- examples
 
 for i = 1, testset:size() do
     fx = hdf5.open ('../torch_test/' .. i .. '_features.h5')
-    inp_te=fx:read('/features'):all ();
+    inp_te=fx:read('/features'):all () --:transpose(1,2);
     sz = inp_te:size ();
     fy = hdf5.open ('../torch_test/' .. i .. '_label.h5')
     out_te=fy:read('/label'):all ()[1]; -- getting a single label since they are the same
-	testset[i] =  {inp_te:view(1, test_sz[2][1], 1, sz[1]):clone(), out_te:view(1):clone()};
+	testset[i] =  {inp_te:clone(), out_te:view(1):clone()};
     fx:close ()
     fy:close ()
 
