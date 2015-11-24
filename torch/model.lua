@@ -9,24 +9,23 @@ local function nonlinearity()
     return nn.ReLU()
 end
 
-mlp:add(nn.Dropout(0.4)) -- 250
-mlp:add (nn.TemporalConvolution (inputs, inputs, 5))
+mlp:add(nn.Dropout(0.4)) -- 50
+mlp:add (nn.TemporalConvolution (inputs, inputs*2, 5))
 mlp:add (nn.ReLU(true))
-mlp:add (nn.TemporalMaxPooling (3)) -- 246/3
+mlp:add (nn.TemporalMaxPooling (2)) -- 46/2
 
-mlp:add(nn.Dropout(0.3)) -- 82
-mlp:add (nn.TemporalConvolution (inputs, inputs, 5))
+mlp:add(nn.Dropout(0.3)) -- 23
+mlp:add (nn.TemporalConvolution (inputs*2, inputs*4, 5))
 mlp:add (nn.ReLU(true))
-mlp:add (nn.TemporalMaxPooling (7)) -- 77 / 7
 
-mlp:add(nn.Dropout(0.2)) -- 11
-mlp:add (nn.TemporalConvolution (inputs, inputs, 3))
+mlp:add(nn.Dropout(0.2)) -- 19
+mlp:add (nn.TemporalConvolution (inputs*4, inputs*8, 3))
 mlp:add (nn.ReLU(true))
-mlp:add (nn.TemporalMaxPooling (9))
+mlp:add (nn.TemporalMaxPooling (17)) -- 17
 
-mlp:add (nn.View (inputs))
+mlp:add (nn.View (inputs*8))
 
-prev_neurons = inputs
+prev_neurons = inputs*8
 for i = 1, layers do
     mlp:add(nn.Dropout(0.1))
     ln = nn.Linear(prev_neurons, hidden[i])

@@ -1,4 +1,4 @@
-function AC_make_torch_batch (F, labels, entries, params)
+function AC_make_torch_batch (F, labels, entries, params, crop_length)
 
 if strcmp (params.type, 'none') == true
     return
@@ -130,11 +130,11 @@ switch params.mode
         for i = 1 : length (utrain)
             features = train_F (:, train_entries==utrain(i));
             label = lm_train (:, train_entries==utrain(i));
-
-            for j = 1 : size (features,2)
+            disp(train_ctx)
+            for j = 1 : crop_length :  size (features,2)
                 filename = sprintf ('%d_features.h5', train_ctx);
-                slice = features(:, j);
-                l = label(:,j);
+                slice = features(:, j : j+crop_length-1);
+                l = label(:,j:j+crop_length-1);
                 h5create(filename,'/features',size(slice),'Datatype','double');
                 h5write(filename,'/features', slice);
                 %save (filename, 'features');
@@ -158,10 +158,11 @@ switch params.mode
         for i = 1 : length (utest)
             features = test_F(:, test_entries==utest(i));
             label = lm_test(:, test_entries==utest(i));
-            for j = 1 : size (features,2)
+            disp(test_ctx)
+            for j = 1 : crop_length : size (features,2)
                 filename = sprintf ('%d_features.h5', test_ctx);
-                slice = features(:, j);
-                l = label(:,j);
+                slice = features(:, j:j+crop_length-1);
+                l = label(:,j:j+crop_length-1);
                 h5create(filename,'/features',size(slice),'Datatype','double');
                 h5write(filename,'/features', slice);
                 %save (filename, 'features');
