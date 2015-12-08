@@ -13,7 +13,7 @@ require 'nn'
 layers = 2
 hidden = {80, 80, 80}
 learningRate = 0.001
-maxIteration = 3000
+maxIteration = 500
 verbose = true
 ---------------
 
