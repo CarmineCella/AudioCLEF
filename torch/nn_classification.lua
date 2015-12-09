@@ -7,13 +7,14 @@
 
 require 'torch'
 require 'nn'
+require 'mattorch'
 --require 'gnuplot'
 
 -- parameters (change here)
 layers = 2
 hidden = {80, 80, 80}
 learningRate = 0.001
-maxIteration = 500
+maxIteration = 3
 verbose = true
 ---------------
 
@@ -99,5 +100,18 @@ end
 
 print('\n** train accuracy:', nCorrect_tr/nSamples_tr*100, '% **')
 print('** test accuracy :', nCorrect_te/nSamples_te*100, '% **\n')
+
+-- exporting convolution filters; NB: position is dependent on the model!
+l1 = mlp:get (2) -- first conv layer
+l2 = mlp:get (6) -- second conv layer
+l3 = mlp:get (9) -- third conv layer
+
+w1 = l1.weight
+w2 = l2.weight
+w3 = l3.weight
+
+mattorch.save ('l1_weights.mat', w1)
+mattorch.save ('l2_weights.mat', w2)
+mattorch.save ('l3_weights.mat', w3)
 
 -- eof
