@@ -43,6 +43,10 @@ folder_labels = cell(nFolders, 1);
 file_ctx = 0; % absolute file counter (incremented by nNonempty_files, not by 1)
 folder_ctx = 0; % absolute folder counter
 
+sobv = [-1 0 1 ;
+        -2 0 2 ;
+        -1 0 1];
+    
 sizes  = [];
 for iFolder = 1 : length (foldernames)
     filenames = dir(strcat (db_location, '/', foldernames(iFolder).name));
@@ -87,6 +91,7 @@ for iFolder = 1 : length (foldernames)
                     'nbands', params.mfcc_bands, 'fbtype', 'mel', ...
                     'dcttype', 2, 'wintime', params.mfcc_win, ...
                     'hoptime', params.mfcc_hop);
+                %file_features{iFile} = conv2 (file_features{iFile}, sobv);
             case 'scattering'
                 if strcmp (params.scat_norm, 'yes')
                     fprintf ('\tcomputing normalized scattering on %s...\n', filename);
