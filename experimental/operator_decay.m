@@ -69,5 +69,27 @@ end
 t = abs (t (:)); %log (abs (t(:)));
 figure
 plot (sort (t, 'descend'))
+%% Build the operator T
 
+% Assume our input signals are represented as matrices s, such that s_{j,r}
+% represents the value of coordinate j at time r
+% Assume that our output signals are represented as matrices Ts,  such that
+% (Ts)_{i,q} is the value of coordinate i at time q
+% T is represented by a tensor T_{i,j,q,r} such that:
+% (Ts)_{i,q} = \sum_{j} \sum_{r} T_{i,j,q,r} s_{j,r}
+% T can be constructed from the filters in k (of size K*(KW)*K') in the
+% following manner:
+length_output = 46;
+length_input = 50;
+dW = 1;
 
+T = zeros(d2,d1,length_output,length_input); % warning, can become very large
+
+for i = 1:d2
+    for q = 1:length_output
+       % fprintf(['Building for dimension ' num2str(i) ' and output position ' num2str(q) '\n']);
+        T(i,:,q,:) = [zeros(d1,(q-1)*dW), k(:,:,i), zeros(d1, length_input - (q-1)*dW - size(k,2))];
+    end
+end
+
+% T can be studied as an operator now
