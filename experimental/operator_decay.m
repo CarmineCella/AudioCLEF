@@ -4,16 +4,18 @@
 close all
 
 %% load data
-load '../torch/l1_weights.mat';
+load 'weights/exp2_l1_weights_41.mat';
 
 %% params and reshape
 d1 = 40;
-sup = 15;
+sup = 41;
 d2 = 40;
-families = 4;
+space = 250;
+families = 6;
 alpha = .5;
 var_ratio = .8;
-denoise = 1;
+denoise_spatial = 2.4;
+denoise = 2.4;
 
 k_r = reshape (x, d1, sup, d2);
 
@@ -21,12 +23,13 @@ k_r = reshape (x, d1, sup, d2);
 figure
 for i = 1 : d2
     subplot (d2/10, 10, i)
-    s = k_r(:, :, i);
+    s =(k_r(:, :, i));
+    s(abs(s)<denoise_spatial*mean(abs(s(:)))) = 0;
     imagesc (s)
 end
 
 %% calculate 2D fft by padding
-k_p = pad_signal (k_r, [d1 50 d2], 'zero', 0);
+k_p = pad_signal (k_r, [d1 space d2], 'zero', 0);
 K = fft2 (k_p);
 aK = abs (K);
 aK_th = zeros(size(aK));
@@ -36,17 +39,17 @@ for i = 1 : d2
     s = aK(:, :, i);
     s(abs(s)<denoise*mean(abs(s(:)))) = 0;
     aK_th(:,:,i) =s;
-    %a = ifft (log(s));
-    %a((9:end), :) = zeros (d2-8, size (a, 2));
+    %a = ifft (log( s));
+    %a((16:end), :) = zeros (d2-15, size (a, 2));
     %e = abs (fft (a));
     imagesc (fftshift (s))
 end
 %%
-sum_f = zeros (size (aK, 1), size(aK, 2));
-for i = 1 : d2
-    sum_f = sum_f + aK(:, :, i);
-end
-imagesc (fftshift (sum_f))
+% sum_f = zeros (size (aK, 1), size(aK, 2));
+% for i = 1 : d2
+%     sum_f = sum_f + aK(:, :, i);
+% end
+% imagesc (fftshift (sum_f))
 
 %% compute distance matrix
 dist = zeros (d2, d2);
@@ -78,7 +81,7 @@ imagesc (L)
 [u,d] = eig(L);
 [evals, ma]= sort (diag(d), 'descend');
 U = u(:, ma);
-principal_eig = [U(:,2:15)];
+principal_eig = [U(:,2:3)];
 [idx1, C1] = kmeans (principal_eig, families);
  
 figure
@@ -91,7 +94,7 @@ for i = 1 : families
     my_size = ceil(sqrt(numel(I)));
     for j = 1 : numel (I)
         subplot (my_size, my_size, j)
-        imagesc (fftshift (aK_th(:, :, I(j))))
+        imagesc (k_r(:, :, I(j)))
     end
     
 end
