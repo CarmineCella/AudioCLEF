@@ -1,42 +1,68 @@
-%% load and reshape data
-%close all
-load '../torch/l1_weights_cc.mat';
+% operator study
+%
 
+close all
+
+%% load data
+load '../torch/l1_weights.mat';
+
+%% params and reshape
 d1 = 40;
+sup = 15;
 d2 = 40;
-families = 2;
+families = 4;
 alpha = .5;
-k = x';
-k_r = reshape (k, d1, 15, d2);
+var_ratio = .8;
+denoise = 1;
+
+k_r = reshape (x, d1, sup, d2);
+
+%% plot spatial filters
+figure
+for i = 1 : d2
+    subplot (d2/10, 10, i)
+    s = k_r(:, :, i);
+    imagesc (s)
+end
 
 %% calculate 2D fft by padding
 k_p = pad_signal (k_r, [d1 50 d2], 'zero', 0);
 K = fft2 (k_p);
 aK = abs (K);
+aK_th = zeros(size(aK));
 figure
 for i = 1 : d2
     subplot (d2/10, 10, i)
-    imagesc ( (fftshift (  (aK(:, :, i)))))
+    s = aK(:, :, i);
+    s(abs(s)<denoise*mean(abs(s(:)))) = 0;
+    aK_th(:,:,i) =s;
+    %a = ifft (log(s));
+    %a((9:end), :) = zeros (d2-8, size (a, 2));
+    %e = abs (fft (a));
+    imagesc (fftshift (s))
 end
 %%
+sum_f = zeros (size (aK, 1), size(aK, 2));
+for i = 1 : d2
+    sum_f = sum_f + aK(:, :, i);
+end
+imagesc (fftshift (sum_f))
+
+%% compute distance matrix
 dist = zeros (d2, d2);
 for i = 1 : d2
    for j = 1 : d2
-       d = (abs (aK (:, :, i)- aK (:, :, j)));
-      dist (i,j) = sum (sum (d));
+       d = ( (aK (:, :, i)- aK (:, :, j))).^2;
+      dist (i,j) = sqrt (sum (sum (d)));
    end
 end
 figure
-imagesc (dist ./ max (max(dist)))
+imagesc (dist)
 
-maK = squeeze (sum (aK))';
-dif = squareform (pdist (maK));
-figure 
-imagesc (dif)
-
+%% embed matrix and make clusters
 [yhisto, xhisto] = hist (dist(:), d2);
-var = (sum (yhisto .* xhisto / sum (yhisto))) * .9;
-A = exp (-(dif.^2)/(var^2));
+var = (sum (yhisto .* xhisto / sum (yhisto))) * var_ratio;
+A = exp (-(dist.^2)/(var^2));
 szadj = size (A);
 D = zeros (szadj(1), szadj(1));
 
@@ -52,16 +78,27 @@ imagesc (L)
 [u,d] = eig(L);
 [evals, ma]= sort (diag(d), 'descend');
 U = u(:, ma);
-principal_eig = [U(:,2)  U(:,3)];
+principal_eig = [U(:,2:15)];
 [idx1, C1] = kmeans (principal_eig, families);
  
 figure
 scatter (principal_eig(:,1), principal_eig(:, 2),[], idx1)
-
+%% show clusters
+for i = 1 : families
+    I = find (idx1 == i);
+    figure
+    
+    my_size = ceil(sqrt(numel(I)));
+    for j = 1 : numel (I)
+        subplot (my_size, my_size, j)
+        imagesc (fftshift (aK_th(:, :, I(j))))
+    end
+    
+end
 %% calculate spectrum of the operator
 clear t;
 for i = 1 : size (K, 2);
-    t(i, :) = eig(squeeze (K(:, i, :))' * squeeze (K(:, i, :)));
+    t(i, :) = eig (squeeze (K(:, i, :))' * squeeze (K(:, i, :)));
 end
 t = abs (t (:)); %log (abs (t(:)));
 figure
@@ -88,5 +125,3 @@ plot (sort (t, 'descend'))
 %         T(i,:,q,:) = [zeros(d1,(q-1)*dW), k_r(:,:,i), zeros(d1, length_input - (q-1)*dW - size(k_r,2))];
 %     end
 % end
-
-% T can be studied as an operator now
