@@ -3,58 +3,82 @@
 
 close all
 
-%% load data
-load 'weights/exp2_l1_weights_41.mat';
 
-%% params and reshape
-d1 = 40;
-sup = 41;
-d2 = 40;
-space = 250;
 families = 6;
 alpha = .5;
 var_ratio = .8;
-denoise_spatial = 2.4;
-denoise = 2.4;
+denoise_spatial = 2;
+denoise = 2;
 
-k_r = reshape (x, d1, sup, d2);
 
+%% load and reshape
+load 'weights/exp2_l1_weights_41.mat';
+
+d1_1 = 40;
+sup_1 = 41;
+d2_1 = 40;
+space_1 = 41;
+k_r = reshape (x, d1_1, sup_1, d2_1);
+%%
+load 'weights/exp2_l2_weights_15.mat';
+d1_2 = 40;
+sup_2 = 15;
+d2_2 = 40;
+space_2 = 41;
+k_r2 = reshape (x, d1_2, sup_2, d2_2);
+
+%% Build an ad hoc distance function for the filters of the first layer
+k_p2 = pad_signal (k_r2, [d1_2 space_2 d2_2], 'zero', 0);
+K2 = fft2 (k_p2);
+aK2 = abs (K2);
+
+D2 = zeros(d2_1);
+
+for i = 1:d2_1
+    for j = 1:d2_1
+        %D2(i,j) = sum(sum(abs(squeeze (aK2(i,:,:))'*squeeze (aK2(j,:,:)))));
+        D2(i,j) = sum(sum((squeeze (aK2(i,:,:))-squeeze (aK2(j,:,:))).^2));
+        %D2(i,j) = sum(sum(abs(k_r2(i,:,:)-k_r2(j,:,:))));
+    end
+end
+imagesc (D2(2:end,2:end))
 %% plot spatial filters
 figure
-for i = 1 : d2
-    subplot (d2/10, 10, i)
+for i = 1 : d2_1
+    subplot (d2_1/10, 10, i)
     s =(k_r(:, :, i));
     s(abs(s)<denoise_spatial*mean(abs(s(:)))) = 0;
     imagesc (s)
 end
 
 %% calculate 2D fft by padding
-k_p = pad_signal (k_r, [d1 space d2], 'zero', 0);
+k_p = pad_signal (k_r, [d1_1 space_1 d2_1], 'zero', 0);
 K = fft2 (k_p);
 aK = abs (K);
+
 aK_th = zeros(size(aK));
 figure
-for i = 1 : d2
-    subplot (d2/10, 10, i)
+for i = 1 : d2_1
+    subplot (d2_2/10, 10, i)
     s = aK(:, :, i);
     s(abs(s)<denoise*mean(abs(s(:)))) = 0;
     aK_th(:,:,i) =s;
     %a = ifft (log( s));
-    %a((16:end), :) = zeros (d2-15, size (a, 2));
+    %a((6:end), :) = zeros (d2_1-5, size (a, 2));
     %e = abs (fft (a));
     imagesc (fftshift (s))
 end
 %%
-% sum_f = zeros (size (aK, 1), size(aK, 2));
-% for i = 1 : d2
-%     sum_f = sum_f + aK(:, :, i);
-% end
-% imagesc (fftshift (sum_f))
+sum_f = zeros (size (aK, 1), size(aK, 2));
+for i = 1 : d2_1
+    sum_f = sum_f + aK(:, :, i);
+end
+imagesc (fftshift (sum_f))
 
 %% compute distance matrix
-dist = zeros (d2, d2);
-for i = 1 : d2
-   for j = 1 : d2
+dist = zeros (d2_1, d2_1);
+for i = 1 : d2_1
+   for j = 1 : d2_1
        d = ( (aK (:, :, i)- aK (:, :, j))).^2;
       dist (i,j) = sqrt (sum (sum (d)));
    end
@@ -62,8 +86,9 @@ end
 figure
 imagesc (dist)
 
+dist = D2;
 %% embed matrix and make clusters
-[yhisto, xhisto] = hist (dist(:), d2);
+[yhisto, xhisto] = hist (dist(:), d2_1);
 var = (sum (yhisto .* xhisto / sum (yhisto))) * var_ratio;
 A = exp (-(dist.^2)/(var^2));
 szadj = size (A);
