@@ -7,20 +7,20 @@ close all
 families = 6;
 alpha = .5;
 var_ratio = .8;
-denoise_spatial = 2;
-denoise = 2;
+denoise_spatial = .3;
+denoise = 2.1;
 
 
 %% load and reshape
-load 'weights/exp2_l1_weights_41.mat';
+load 'weights/exp2_l2_weights_15.mat';
 
 d1_1 = 40;
-sup_1 = 41;
+sup_1 = 15;
 d2_1 = 40;
 space_1 = 41;
 k_r = reshape (x, d1_1, sup_1, d2_1);
 %%
-load 'weights/exp2_l2_weights_15.mat';
+load 'weights/exp2_l2_weights_15.mat'; 
 d1_2 = 40;
 sup_2 = 15;
 d2_2 = 40;
