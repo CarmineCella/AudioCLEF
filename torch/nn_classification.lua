@@ -14,7 +14,7 @@ require 'mattorch'
 layers = 2
 hidden = {80, 80, 80}
 learningRate = 0.001
-maxIteration = 200
+maxIteration = 2000
 verbose = true
 ---------------
 

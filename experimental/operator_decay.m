@@ -3,7 +3,6 @@
 
 close all
 
-
 families = 6;
 alpha = .5;
 var_ratio = .8;
@@ -12,12 +11,12 @@ denoise = 2.1;
 
 
 %% load and reshape
-load 'weights/exp2_l2_weights_15.mat';
+load '~/Desktop/l1_weights.mat';
 
 d1_1 = 40;
-sup_1 = 15;
+sup_1 = 41;
 d2_1 = 40;
-space_1 = 41;
+space_1 = 250;
 k_r = reshape (x, d1_1, sup_1, d2_1);
 %%
 load 'weights/exp2_l2_weights_15.mat'; 

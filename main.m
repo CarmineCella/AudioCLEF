@@ -23,8 +23,8 @@ if ~exist('datasets_folder', 'var')
 end
 %db_params = struct ('location', [datasets_folder, 'solosDb']);                % 20  classes
 %db_params = struct ('location', [datasets_folder, 'bird_fake']);              % 2   classes
-db_params = struct ('location', [datasets_folder, 'minibird']);                % 15  classes
-%db_params = struct ('location', [datasets_folder, 'BD50CLASSES/FOLDERS']);    % 50  classes
+%db_params = struct ('location', [datasets_folder, 'minibird']);                % 15  classes
+db_params = struct ('location', [datasets_folder, 'BD50CLASSES/FOLDERS']);    % 50  classes
 %db_params = struct ('location', [datasets_folder, 'BirdCLEF_2014_folders']);  % 500 classes
 
 features_params = struct ('type', 'mfcc', ...

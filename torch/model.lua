@@ -9,7 +9,7 @@ local function nonlinearity()
     return nn.ReLU()
 end
 
-mlp:add(nn.Dropout(0.4)) -- 250
+mlp:add(nn.Dropout(0.5)) -- 250
 mlp:add (nn.TemporalConvolution (inputs, inputs, 41))
 mlp:add (nn.ReLU(true))
 mlp:add (nn.TemporalMaxPooling (5)) -- 210
@@ -17,11 +17,15 @@ mlp:add (nn.TemporalMaxPooling (5)) -- 210
 mlp:add(nn.Dropout(0.3)) -- 42
 mlp:add (nn.TemporalConvolution (inputs, inputs, 15))
 mlp:add (nn.ReLU(true))
---
--- mlp:add(nn.Dropout(0.2)) -- 19
--- mlp:add (nn.TemporalConvolution (inputs*4, inputs*8, 3))
--- mlp:add (nn.ReLU(true))
-mlp:add (nn.TemporalMaxPooling (27))
+mlp:add (nn.TemporalMaxPooling (3))
+
+mlp:add(nn.Dropout(0.1)) -- 9
+mlp:add (nn.TemporalConvolution (inputs, inputs, 3))
+mlp:add (nn.ReLU(true))
+mlp:add (nn.TemporalMaxPooling (7))
+
+mlp:add (nn.View (inputs))
+
 
 mlp:add (nn.View (inputs))
 
